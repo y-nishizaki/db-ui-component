@@ -12,6 +12,13 @@ from .chart_component import ChartComponent
 from .table_component import TableComponent
 from .filter_component import FilterComponent
 from .dashboard import Dashboard
+from .visualization import (
+    SankeyChartComponent,
+    HeatmapComponent,
+    NetworkGraphComponent,
+    TreemapComponent,
+    BubbleChartComponent
+)
 
 __version__ = "1.0.0"
 __author__ = "Your Name"
@@ -24,4 +31,9 @@ __all__ = [
     "TableComponent", 
     "FilterComponent",
     "Dashboard",
+    "SankeyChartComponent",
+    "HeatmapComponent",
+    "NetworkGraphComponent",
+    "TreemapComponent",
+    "BubbleChartComponent",
 ] 

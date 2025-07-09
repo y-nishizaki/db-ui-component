@@ -59,6 +59,13 @@ pip install -e .
 - ヒートマップ
 - 時系列グラフ
 
+### 高度な可視化コンポーネント
+- サンキーチャート（データフロー可視化）
+- ヒートマップ（相関分析）
+- ネットワークグラフ（関係性可視化）
+- ツリーマップ（階層データ可視化）
+- バブルチャート（3次元データ可視化）
+
 ### テーブルコンポーネント
 - CSVダウンロード機能
 - ソート機能
@@ -265,7 +272,133 @@ A: `component.update_data(new_df)`でデータを更新し、再度`displayHTML(
 ### Q: カスタムCSSは適用できますか？
 A: はい、`component.set_style()`でスタイルを設定できます。また、`displayHTML()`に直接CSSを含めることも可能です。
 
+### Q: 高度な可視化コンポーネントはどのようなものがありますか？
+A: サンキーチャート、ヒートマップ、ネットワークグラフ、ツリーマップ、バブルチャートなどの高度な可視化コンポーネントが利用できます。
+
+## 高度な可視化コンポーネント
+
+### SankeyChartComponent
+データフローやプロセスフローを可視化するサンキーチャート
+
+**パラメータ:**
+- `source_column`: ソースノードの列名
+- `target_column`: ターゲットノードの列名
+- `value_column`: フロー値の列名
+- `title`: チャートのタイトル
+- `height`: チャートの高さ
+
+**使用例:**
+```python
+from db_ui_components import SankeyChartComponent
+
+sankey = SankeyChartComponent(
+    source_column='source',
+    target_column='target',
+    value_column='value',
+    title='データフロー図'
+)
+displayHTML(sankey.render(data))
+```
+
+### HeatmapComponent
+2次元データの相関や分布を可視化するヒートマップ
+
+**パラメータ:**
+- `x_column`: X軸の列名
+- `y_column`: Y軸の列名
+- `value_column`: 値の列名
+- `title`: チャートのタイトル
+- `color_scale`: カラースケール
+
+**使用例:**
+```python
+from db_ui_components import HeatmapComponent
+
+heatmap = HeatmapComponent(
+    x_column='x',
+    y_column='y',
+    value_column='value',
+    title='相関ヒートマップ'
+)
+displayHTML(heatmap.render(data))
+```
+
+### NetworkGraphComponent
+ノードとエッジの関係を可視化するネットワークグラフ
+
+**パラメータ:**
+- `source_column`: ソースノードの列名
+- `target_column`: ターゲットノードの列名
+- `weight_column`: エッジの重みの列名（オプション）
+- `title`: チャートのタイトル
+
+**使用例:**
+```python
+from db_ui_components import NetworkGraphComponent
+
+network = NetworkGraphComponent(
+    source_column='source',
+    target_column='target',
+    title='ネットワーク関係図'
+)
+displayHTML(network.render(data))
+```
+
+### TreemapComponent
+階層構造を持つデータを可視化するツリーマップ
+
+**パラメータ:**
+- `labels_column`: ラベルの列名
+- `parents_column`: 親要素の列名
+- `values_column`: 値の列名
+- `title`: チャートのタイトル
+
+**使用例:**
+```python
+from db_ui_components import TreemapComponent
+
+treemap = TreemapComponent(
+    labels_column='labels',
+    parents_column='parents',
+    values_column='values',
+    title='階層データ可視化'
+)
+displayHTML(treemap.render(data))
+```
+
+### BubbleChartComponent
+3次元データを可視化するバブルチャート
+
+**パラメータ:**
+- `x_column`: X軸の列名
+- `y_column`: Y軸の列名
+- `size_column`: バブルサイズの列名
+- `color_column`: カラー分けの列名（オプション）
+- `title`: チャートのタイトル
+
+**使用例:**
+```python
+from db_ui_components import BubbleChartComponent
+
+bubble = BubbleChartComponent(
+    x_column='x',
+    y_column='y',
+    size_column='size',
+    color_column='color',
+    title='3次元データ可視化'
+)
+displayHTML(bubble.render(data))
+```
+
 ## 更新履歴
+
+### v1.1.0
+- 高度な可視化コンポーネントを追加
+  - サンキーチャート
+  - ヒートマップ
+  - ネットワークグラフ
+  - ツリーマップ
+  - バブルチャート
 
 ### v1.0.0
 - 初期リリース
