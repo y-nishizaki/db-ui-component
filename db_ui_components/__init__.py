@@ -13,6 +13,7 @@ from .table_component import TableComponent
 from .filter_component import FilterComponent
 from .dashboard import Dashboard
 from .database_component import DatabaseComponent, SparkComponent
+from .databricks_database import DatabricksDatabaseComponent, execute_sql, get_tables, preview_table
 from .visualization import (
     SankeyChartComponent,
     HeatmapComponent,
@@ -34,6 +35,10 @@ __all__ = [
     "Dashboard",
     "DatabaseComponent",
     "SparkComponent",
+    "DatabricksDatabaseComponent",
+    "execute_sql",
+    "get_tables",
+    "preview_table",
     "SankeyChartComponent",
     "HeatmapComponent",
     "NetworkGraphComponent",
