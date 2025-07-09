@@ -2,6 +2,36 @@
 
 Databricksでノートブックからダッシュボードを作成する際に使用できる、便利なUIコンポーネントライブラリです。
 
+## インストール
+
+### PyPIからのインストール（推奨）
+
+```bash
+pip install db-ui-components
+```
+
+### 開発版のインストール
+
+```bash
+# GitHubから直接インストール
+pip install git+https://github.com/your-username/db-ui-components.git
+
+# または、ローカルでビルドしてインストール
+git clone https://github.com/your-username/db-ui-components.git
+cd db-ui-components
+pip install -e .
+```
+
+### Databricksノートブックでの使用
+
+```python
+# ノートブック内で直接インストール
+!pip install db-ui-components
+
+# または、開発版をインストール
+!pip install git+https://github.com/your-username/db-ui-components.git
+```
+
 **特徴:**
 - 🎯 Databricksの`displayHTML`関数で直接表示可能
 - 📊 データを渡すとHTMLが自動生成される
@@ -42,35 +72,11 @@ Databricksでノートブックからダッシュボードを作成する際に�
 - マルチセレクトフィルター
 - テキスト検索フィルター
 
-## インストール
 
-### Databricksノートブックでの使用
-
-```python
-# ノートブック内で直接インストール
-!pip install git+https://github.com/your-username/db-ui-component.git
-
-# または、ファイルをアップロードして使用
-# 1. リポジトリをクローン
-# 2. db_ui_componentsフォルダをDatabricksにアップロード
-# 3. パスを追加
-import sys
-sys.path.append('/dbfs/your-path/db-ui-component')
-```
-
-### ローカル開発環境
-
-```bash
-# リポジトリをクローン
-git clone https://github.com/your-username/db-ui-component.git
-
-# 依存関係をインストール
-pip install -r requirements.txt
-```
 
 ## 使用方法
 
-### Databricksでの基本的な使用例
+### 基本的な使用例
 
 ```python
 # 1. ライブラリをインポート

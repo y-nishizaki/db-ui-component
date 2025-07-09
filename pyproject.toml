@@ -1,0 +1,76 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "db-ui-components"
+version = "1.0.0"
+description = "Databricksダッシュボード用UIコンポーネントライブラリ"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+maintainers = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+keywords = ["databricks", "dashboard", "ui", "components", "plotly", "dash"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "pandas>=1.5.0",
+    "numpy>=1.21.0",
+    "plotly>=5.0.0",
+    "dash>=2.0.0",
+    "dash-bootstrap-components>=1.0.0",
+    "dash-table>=5.0.0",
+    "flask>=2.0.0",
+    "jinja2>=3.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=2.20.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-username/db-ui-components"
+Repository = "https://github.com/your-username/db-ui-components"
+Documentation = "https://github.com/your-username/db-ui-components#readme"
+Issues = "https://github.com/your-username/db-ui-components/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["db_ui_components*"]
+
+[tool.setuptools.package-data]
+"db_ui_components" = ["*.py", "*.md", "*.txt"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=db_ui_components --cov-report=term-missing"
