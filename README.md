@@ -79,6 +79,15 @@ pip install -e .
 - マルチセレクトフィルター
 - テキスト検索フィルター
 
+### データベースアクセスコンポーネント
+- Databricks SQL接続
+- テーブル一覧表示
+- SQLクエリ実行
+- テーブルスキーマ取得
+- データプレビュー機能
+- PySpark統合
+- クエリキャッシュ機能
+
 
 
 ## 使用方法
@@ -183,6 +192,68 @@ displayHTML(table.render())
 ```python
 filter_comp = FilterComponent(filter_type='dropdown', column='category', options=['A', 'B', 'C'])
 displayHTML(filter_comp.render())
+```
+
+### DatabaseComponent
+Databricksデータベースアクセスを提供するコンポーネント
+
+**パラメータ:**
+- `component_id`: コンポーネントID
+- `workspace_url`: DatabricksワークスペースURL
+- `token`: Databricksアクセストークン
+- `catalog`: カタログ名
+- `schema`: スキーマ名
+
+**使用例:**
+```python
+# 環境変数から認証情報を取得
+import os
+db = DatabaseComponent(
+    component_id="my-db",
+    workspace_url=os.getenv('DATABRICKS_WORKSPACE_URL'),
+    token=os.getenv('DATABRICKS_TOKEN'),
+    catalog="hive_metastore",
+    schema="default"
+)
+
+# テーブル一覧を取得
+tables = db.get_tables()
+
+# SQLクエリを実行
+result = db.execute_query("SELECT * FROM my_table LIMIT 100")
+
+# テーブル統計を取得
+stats = db.get_table_stats("my_table")
+
+# displayHTMLで表示
+displayHTML(db.render())
+```
+
+### SparkComponent
+PySparkを使用したDatabricks接続コンポーネント
+
+**パラメータ:**
+- `component_id`: コンポーネントID
+- `spark_config`: Spark設定辞書
+
+**使用例:**
+```python
+spark = SparkComponent(
+    component_id="my-spark",
+    spark_config={
+        "spark.sql.adaptive.enabled": "true",
+        "spark.sql.adaptive.coalescePartitions.enabled": "true"
+    }
+)
+
+# テーブルを読み込み
+df = spark.read_table("my_table")
+
+# SQLクエリを実行
+result = spark.execute_sql("SELECT * FROM my_table")
+
+# displayHTMLで表示
+displayHTML(spark.render())
 ```
 
 ## カスタマイズ

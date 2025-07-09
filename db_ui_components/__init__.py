@@ -12,6 +12,7 @@ from .chart_component import ChartComponent
 from .table_component import TableComponent
 from .filter_component import FilterComponent
 from .dashboard import Dashboard
+from .database_component import DatabaseComponent, SparkComponent
 from .visualization import (
     SankeyChartComponent,
     HeatmapComponent,
@@ -31,6 +32,8 @@ __all__ = [
     "TableComponent", 
     "FilterComponent",
     "Dashboard",
+    "DatabaseComponent",
+    "SparkComponent",
     "SankeyChartComponent",
     "HeatmapComponent",
     "NetworkGraphComponent",
