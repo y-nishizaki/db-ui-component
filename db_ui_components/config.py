@@ -8,6 +8,7 @@ from typing import Dict, Any, Optional, List
 import json
 from dataclasses import dataclass, field
 from enum import Enum
+from abc import ABC, abstractmethod
 
 
 class LayoutType(Enum):
@@ -80,7 +81,7 @@ class ComponentConfig:
 
 
 @dataclass
-class DashboardConfig:
+class DashboardConfig(ComponentConfig):
     """ダッシュボード設定のデータクラス"""
     
     title: Optional[str] = None
@@ -100,7 +101,8 @@ class DashboardConfig:
     
     def to_dict(self) -> Dict[str, Any]:
         """辞書形式で取得"""
-        return {
+        base_dict = super().to_dict()
+        base_dict.update({
             "title": self.title,
             "layout": self.layout.value,
             "grid_columns": self.grid_columns,
@@ -111,7 +113,8 @@ class DashboardConfig:
             "header_padding": self.header_padding,
             "container_background": self.container_background,
             "container_border_radius": self.container_border_radius
-        }
+        })
+        return base_dict
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'DashboardConfig':
@@ -222,63 +225,15 @@ class FilterConfig(ComponentConfig):
         return base_dict
 
 
-class ConfigManager:
-    """設定管理クラス"""
+class ConfigStorage:
+    """設定ストレージクラス"""
     
     def __init__(self):
-        """初期化"""
         self._configs: Dict[str, Any] = {}
         self._default_configs: Dict[str, Any] = {}
     
-    def register_default_config(self, component_type: str, config: Any) -> None:
-        """
-        デフォルト設定を登録
-        
-        Args:
-            component_type: コンポーネントタイプ
-            config: 設定オブジェクト
-        """
-        self._default_configs[component_type] = config
-    
-    def get_config(self, component_type: str, config_id: Optional[str] = None) -> Any:
-        """
-        設定を取得
-        
-        Args:
-            component_type: コンポーネントタイプ
-            config_id: 設定ID（Noneの場合はデフォルト設定）
-            
-        Returns:
-            設定オブジェクト
-        """
-        if config_id is None:
-            return self._default_configs.get(component_type)
-        
-        key = f"{component_type}_{config_id}"
-        return self._configs.get(key, self._default_configs.get(component_type))
-    
-    def set_config(self, component_type: str, config: Any, config_id: Optional[str] = None) -> None:
-        """
-        設定を設定
-        
-        Args:
-            component_type: コンポーネントタイプ
-            config: 設定オブジェクト
-            config_id: 設定ID
-        """
-        if config_id is None:
-            self._default_configs[component_type] = config
-        else:
-            key = f"{component_type}_{config_id}"
-            self._configs[key] = config
-    
     def save_configs(self, filename: str) -> None:
-        """
-        設定をファイルに保存
-        
-        Args:
-            filename: ファイル名
-        """
+        """設定をファイルに保存"""
         configs_dict = {
             "default_configs": {
                 k: v.to_dict() if hasattr(v, 'to_dict') else v
@@ -293,6 +248,159 @@ class ConfigManager:
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(configs_dict, f, indent=2, ensure_ascii=False)
     
+    def load_configs(self, filename: str, config_converter: 'ConfigConverter') -> None:
+        """設定をファイルから読み込み"""
+        with open(filename, 'r', encoding='utf-8') as f:
+            configs_dict = json.load(f)
+        
+        # デフォルト設定の復元
+        for component_type, config_data in configs_dict.get("default_configs", {}).items():
+            config_class = config_converter.get_config_class(component_type)
+            if config_class:
+                self._default_configs[component_type] = config_class.from_dict(config_data)
+        
+        # 個別設定の復元
+        for config_key, config_data in configs_dict.get("configs", {}).items():
+            component_type = config_key.split('_')[0]
+            config_class = config_converter.get_config_class(component_type)
+            if config_class:
+                self._configs[config_key] = config_class.from_dict(config_data)
+    
+    def get_config(self, component_type: str, config_id: Optional[str] = None) -> Any:
+        """設定を取得"""
+        if config_id is None:
+            return self._default_configs.get(component_type)
+        
+        key = f"{component_type}_{config_id}"
+        return self._configs.get(key, self._default_configs.get(component_type))
+    
+    def set_config(self, component_type: str, config: Any, config_id: Optional[str] = None) -> None:
+        """設定を設定"""
+        if config_id is None:
+            self._default_configs[component_type] = config
+        else:
+            key = f"{component_type}_{config_id}"
+            self._configs[key] = config
+
+
+class ConfigConverter:
+    """設定変換クラス"""
+    
+    def __init__(self):
+        self._config_classes = {
+            "dashboard": DashboardConfig,
+            "table": TableConfig,
+            "chart": ChartConfig,
+            "filter": FilterConfig
+        }
+    
+    def get_config_class(self, component_type: str) -> Optional[type]:
+        """設定クラスを取得"""
+        return self._config_classes.get(component_type)
+    
+    def register_config_class(self, component_type: str, config_class: type) -> None:
+        """設定クラスを登録"""
+        self._config_classes[component_type] = config_class
+
+
+class ConfigValidator:
+    """設定検証クラス"""
+    
+    @staticmethod
+    def validate_component_config(config: ComponentConfig) -> bool:
+        """コンポーネント設定を検証"""
+        if config.height < 0:
+            return False
+        if config.width is not None and config.width < 0:
+            return False
+        if config.padding < 0:
+            return False
+        if config.margin < 0:
+            return False
+        return True
+    
+    @staticmethod
+    def validate_table_config(config: TableConfig) -> bool:
+        """テーブル設定を検証"""
+        if not ConfigValidator.validate_component_config(config):
+            return False
+        if config.page_size < 1:
+            return False
+        return True
+    
+    @staticmethod
+    def validate_chart_config(config: ChartConfig) -> bool:
+        """チャート設定を検証"""
+        if not ConfigValidator.validate_component_config(config):
+            return False
+        return True
+    
+    @staticmethod
+    def validate_filter_config(config: FilterConfig) -> bool:
+        """フィルター設定を検証"""
+        if not ConfigValidator.validate_component_config(config):
+            return False
+        if not config.column:
+            return False
+        return True
+
+
+class ConfigManager:
+    """設定管理クラス"""
+    
+    def __init__(self):
+        """初期化"""
+        self.storage = ConfigStorage()
+        self.converter = ConfigConverter()
+        self.validator = ConfigValidator()
+    
+    def register_default_config(self, component_type: str, config: Any) -> None:
+        """
+        デフォルト設定を登録
+        
+        Args:
+            component_type: コンポーネントタイプ
+            config: 設定オブジェクト
+        """
+        self.storage.set_config(component_type, config)
+    
+    def get_config(self, component_type: str, config_id: Optional[str] = None) -> Any:
+        """
+        設定を取得
+        
+        Args:
+            component_type: コンポーネントタイプ
+            config_id: 設定ID（Noneの場合はデフォルト設定）
+            
+        Returns:
+            設定オブジェクト
+        """
+        return self.storage.get_config(component_type, config_id)
+    
+    def set_config(self, component_type: str, config: Any, config_id: Optional[str] = None) -> None:
+        """
+        設定を設定
+        
+        Args:
+            component_type: コンポーネントタイプ
+            config: 設定オブジェクト
+            config_id: 設定ID
+        """
+        # 設定を検証
+        if not self._validate_config(component_type, config):
+            raise ValueError(f"Invalid config for component type: {component_type}")
+        
+        self.storage.set_config(component_type, config, config_id)
+    
+    def save_configs(self, filename: str) -> None:
+        """
+        設定をファイルに保存
+        
+        Args:
+            filename: ファイル名
+        """
+        self.storage.save_configs(filename)
+    
     def load_configs(self, filename: str) -> None:
         """
         設定をファイルから読み込み
@@ -300,31 +408,18 @@ class ConfigManager:
         Args:
             filename: ファイル名
         """
-        with open(filename, 'r', encoding='utf-8') as f:
-            configs_dict = json.load(f)
-        
-        # デフォルト設定の復元
-        for component_type, config_data in configs_dict.get("default_configs", {}).items():
-            config_class = self._get_config_class(component_type)
-            if config_class:
-                self._default_configs[component_type] = config_class.from_dict(config_data)
-        
-        # 個別設定の復元
-        for config_key, config_data in configs_dict.get("configs", {}).items():
-            component_type = config_key.split('_')[0]
-            config_class = self._get_config_class(component_type)
-            if config_class:
-                self._configs[config_key] = config_class.from_dict(config_data)
+        self.storage.load_configs(filename, self.converter)
     
-    def _get_config_class(self, component_type: str) -> Optional[type]:
-        """設定クラスを取得"""
-        config_classes = {
-            "dashboard": DashboardConfig,
-            "table": TableConfig,
-            "chart": ChartConfig,
-            "filter": FilterConfig
-        }
-        return config_classes.get(component_type)
+    def _validate_config(self, component_type: str, config: Any) -> bool:
+        """設定を検証"""
+        if component_type == "table":
+            return self.validator.validate_table_config(config)
+        elif component_type == "chart":
+            return self.validator.validate_chart_config(config)
+        elif component_type == "filter":
+            return self.validator.validate_filter_config(config)
+        else:
+            return self.validator.validate_component_config(config)
 
 
 # グローバル設定マネージャー
