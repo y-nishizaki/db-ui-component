@@ -33,7 +33,7 @@ __version__ = "1.0.0"
 __author__ = "Databricks Team"
 __email__ = "team@databricks.com"
 __description__ = "Databricksダッシュボード用UIコンポーネントライブラリ"
-__url__ = "https://github.com/databricks/db-ui-components"
+__url__ = "https://github.com/y-nishizaki/db-ui-components"
 
 __all__ = [
     "ChartComponent",

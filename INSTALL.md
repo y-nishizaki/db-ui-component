@@ -20,14 +20,14 @@ pip install db-ui-components
 #### GitHubから直接インストール
 
 ```bash
-pip install git+https://github.com/your-username/db-ui-components.git
+pip install git+https://github.com/y-nishizaki/db-ui-components.git
 ```
 
 #### ローカルでビルドしてインストール
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/your-username/db-ui-components.git
+git clone https://github.com/y-nishizaki/db-ui-components.git
 cd db-ui-components
 
 # 開発モードでインストール（推奨）
@@ -46,7 +46,7 @@ pip install .
 !pip install db-ui-components
 
 # または、開発版をインストール
-!pip install git+https://github.com/your-username/db-ui-components.git
+!pip install git+https://github.com/y-nishizaki/db-ui-components.git
 ```
 
 #### ファイルをアップロードして使用
@@ -129,7 +129,7 @@ pip install db-ui-components
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/your-username/db-ui-components.git
+git clone https://github.com/y-nishizaki/db-ui-components.git
 cd db-ui-components
 
 # 開発依存関係を含めてインストール

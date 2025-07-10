@@ -14,10 +14,10 @@ pip install db-ui-components
 
 ```bash
 # GitHubから直接インストール
-pip install git+https://github.com/databricks/db-ui-components.git
+pip install git+https://github.com/y-nishizaki/db-ui-components.git
 
 # または、ローカルでビルドしてインストール
-git clone https://github.com/databricks/db-ui-components.git
+git clone https://github.com/y-nishizaki/db-ui-components.git
 cd db-ui-components
 pip install -e .
 ```
@@ -29,7 +29,7 @@ pip install -e .
 !pip install db-ui-components
 
 # または、開発版をインストール
-!pip install git+https://github.com/databricks/db-ui-components.git
+!pip install git+https://github.com/y-nishizaki/db-ui-components.git
 ```
 
 **特徴:**
@@ -87,8 +87,6 @@ pip install -e .
 - データプレビュー機能
 - PySpark統合
 - クエリキャッシュ機能
-
-
 
 ## 使用方法
 
@@ -324,7 +322,7 @@ python setup.py build
 
 ## サポート
 
-問題や質問がある場合は、[Issues](https://github.com/your-username/db-ui-component/issues)で報告してください。
+問題や質問がある場合は、[Issues](https://github.com/y-nishizaki/db-ui-components/issues)で報告してください。
 
 ## よくある質問
 
@@ -463,20 +461,18 @@ displayHTML(bubble.render(data))
 
 ## 更新履歴
 
-### v1.1.0
-- 高度な可視化コンポーネントを追加
-  - サンキーチャート
-  - ヒートマップ
-  - ネットワークグラフ
-  - ツリーマップ
-  - バブルチャート
-
 ### v1.0.0
 - 初期リリース
 - 基本的なグラフ・テーブルコンポーネント
 - CSVダウンロード機能
 - フィルター機能
 - Databricks `displayHTML`対応
+- 高度な可視化コンポーネント
+  - サンキーチャート
+  - ヒートマップ
+  - ネットワークグラフ
+  - ツリーマップ
+  - バブルチャート
 
 ## ライセンス
 

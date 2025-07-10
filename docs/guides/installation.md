@@ -40,20 +40,20 @@ pip install db-ui-components --pre
 
 ```bash
 # 最新版のインストール
-pip install git+https://github.com/databricks/db-ui-components.git
+pip install git+https://github.com/y-nishizaki/db-ui-components.git
 
 # 特定ブランチのインストール
-pip install git+https://github.com/databricks/db-ui-components.git@develop
+pip install git+https://github.com/y-nishizaki/db-ui-components.git@develop
 
 # 特定コミットのインストール
-pip install git+https://github.com/databricks/db-ui-components.git@commit_hash
+pip install git+https://github.com/y-nishizaki/db-ui-components.git@commit_hash
 ```
 
 ### 3. ローカルからのインストール
 
 ```bash
 # リポジトリのクローン
-git clone https://github.com/databricks/db-ui-components.git
+git clone https://github.com/y-nishizaki/db-ui-components.git
 cd db-ui-components
 
 # 開発モードでのインストール
@@ -72,7 +72,7 @@ pip install .
 !pip install db-ui-components
 
 # または、GitHubからインストール
-!pip install git+https://github.com/databricks/db-ui-components.git
+!pip install git+https://github.com/y-nishizaki/db-ui-components.git
 ```
 
 ### Databricksクラスターでのインストール
@@ -133,7 +133,7 @@ conda activate db-ui-components-env
 
 ```bash
 # リポジトリのクローン
-git clone https://github.com/databricks/db-ui-components.git
+git clone https://github.com/y-nishizaki/db-ui-components.git
 cd db-ui-components
 
 # 開発用インストール

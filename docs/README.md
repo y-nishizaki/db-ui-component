@@ -48,7 +48,7 @@
 
 ## 📝 ドキュメントの更新
 
-このドキュメントは継続的に更新されています。改善提案やバグ報告は [Issues](https://github.com/databricks/db-ui-components/issues) でお知らせください。
+このドキュメントは継続的に更新されています。改善提案やバグ報告は [Issues](https://github.com/y-nishizaki/db-ui-components/issues) でお知らせください。
 
 ## 🤝 コントリビューション
 

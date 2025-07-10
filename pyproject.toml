@@ -52,10 +52,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/databricks/db-ui-components"
-Repository = "https://github.com/databricks/db-ui-components"
-Documentation = "https://github.com/databricks/db-ui-components#readme"
-Issues = "https://github.com/databricks/db-ui-components/issues"
+Homepage = "https://github.com/y-nishizaki/db-ui-components"
+Repository = "https://github.com/y-nishizaki/db-ui-components"
+Documentation = "https://github.com/y-nishizaki/db-ui-components#readme"
+Issues = "https://github.com/y-nishizaki/db-ui-components/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
