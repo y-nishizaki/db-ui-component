@@ -1,261 +1,124 @@
-# よくある問題 (FAQ)
+# よくある質問（FAQ）
 
-このページでは、Databricks UI Component Libraryを使用する際によく発生する問題とその解決方法を説明します。
+このドキュメントでは、db-ui-componentsライブラリに関するよくある質問とその回答をまとめています。
 
-## 🚨 よくある問題
+## インストール関連
 
-### Q1: グラフが表示されない
+### Q: どのPythonバージョンが必要ですか？
+A: Python 3.8以上が必要です。
 
-**症状:** `displayHTML()`を実行してもグラフが表示されない
-
-**原因と解決方法:**
-
-1. **データの問題**
-```python
-# データが空でないことを確認
-print(f"データ行数: {len(df)}")
-print(f"データ列: {df.columns.tolist()}")
-```
-
-2. **列名の問題**
-```python
-# 指定した列が存在することを確認
-print(f"X軸列 '{x_column}' が存在: {x_column in df.columns}")
-print(f"Y軸列 '{y_column}' が存在: {y_column in df.columns}")
-```
-
-3. **データ型の問題**
-```python
-# データ型を確認
-print(f"X軸データ型: {df[x_column].dtype}")
-print(f"Y軸データ型: {df[y_column].dtype}")
-```
-
-**解決例:**
-```python
-# 正しい使用例
-import pandas as pd
-import numpy as np
-from db_ui_components import ChartComponent
-
-# データを確認
-df = pd.DataFrame({
-    'date': pd.date_range('2024-01-01', periods=30, freq='D'),
-    'sales': np.random.normal(1000, 200, 30)
-})
-
-print(f"データ確認: {len(df)}行, 列: {df.columns.tolist()}")
-
-# グラフを作成
-chart = ChartComponent(
-    data=df,
-    chart_type='line',
-    x_column='date',
-    y_column='sales',
-    title='売上推移'
-)
-
-# 表示
-displayHTML(chart.render())
-```
-
-### Q2: テーブルが正しく表示されない
-
-**症状:** テーブルのソートや検索が機能しない
-
-**解決方法:**
-
-1. **JavaScriptの有効化確認**
-```python
-# テーブルコンポーネントの基本設定
-from db_ui_components import TableComponent
-
-table = TableComponent(
-    data=df,
-    enable_csv_download=True,
-    sortable=True,
-    searchable=True,
-    page_size=10  # ページサイズを明示的に設定
-)
-```
-
-2. **データの前処理**
-```python
-# NULL値を処理
-df = df.fillna('')  # または適切な値で置換
-
-# データ型を確認
-print(df.dtypes)
-```
-
-### Q3: パフォーマンスが悪い
-
-**症状:** 大量データでグラフの表示が遅い
-
-**解決方法:**
-
-1. **データサイズの制限**
-```python
-# 表示するデータを制限
-df_sample = df.head(1000)  # 最大1000行に制限
-
-chart = ChartComponent(
-    data=df_sample,
-    chart_type='line',
-    x_column='date',
-    y_column='sales'
-)
-```
-
-2. **データの集約**
-```python
-# 日次データを月次に集約
-df_monthly = df.groupby(df['date'].dt.to_period('M')).agg({
-    'sales': 'sum',
-    'profit': 'sum'
-}).reset_index()
-```
-
-3. **キャッシュの活用**
-```python
-# グラフを一度作成して再利用
-chart = ChartComponent(data=df, chart_type='line', x_column='date', y_column='sales')
-html_output = chart.render()
-
-# 複数回表示
-displayHTML(html_output)
-```
-
-### Q4: エラーメッセージが表示される
-
-**よくあるエラーと解決方法:**
-
-#### ImportError: No module named 'db_ui_components'
-
+### Q: インストール時にエラーが発生します
+A: 以下の手順を試してください：
 ```bash
-# インストール確認
+# 依存関係を確認
+pip install pandas plotly dash
+
+# ライブラリをインストール
 pip install db-ui-components
-
-# または開発版
-pip install git+https://github.com/your-username/db-ui-components.git
 ```
 
-#### ValueError: Invalid chart type
-
-```python
-# サポートされているグラフタイプを確認
-valid_types = ['line', 'bar', 'pie', 'scatter', 'heatmap']
-print(f"使用可能なグラフタイプ: {valid_types}")
-
-# 正しいグラフタイプを使用
-chart = ChartComponent(
-    data=df,
-    chart_type='line',  # 正しいタイプ
-    x_column='date',
-    y_column='sales'
-)
+### Q: 開発版をインストールしたい
+A: 以下のコマンドを使用してください：
+```bash
+pip install git+https://github.com/y-nishizaki/db-ui-components.git
 ```
 
-#### KeyError: Column not found
+## 使用方法
 
+### Q: 基本的な使い方を教えてください
+A: 以下のコードで始められます：
 ```python
-# 列名を確認
-print(f"利用可能な列: {df.columns.tolist()}")
+from db_ui_components import ChartComponent
+import pandas as pd
 
-# 正しい列名を使用
-chart = ChartComponent(
-    data=df,
-    chart_type='line',
-    x_column='date',  # 存在する列名
-    y_column='sales'  # 存在する列名
-)
-```
-
-### Q5: スタイルが適用されない
-
-**症状:** `set_style()`で設定したスタイルが反映されない
-
-**解決方法:**
-
-```python
-# スタイルを設定してからレンダリング
-chart = ChartComponent(data=df, chart_type='line', x_column='date', y_column='sales')
-
-# スタイルを設定
-chart.set_style({
-    'backgroundColor': '#f5f5f5',
-    'borderRadius': '8px',
-    'padding': '16px'
-})
-
-# レンダリング
+df = pd.DataFrame({'x': [1, 2, 3], 'y': [1, 4, 9]})
+chart = ChartComponent(data=df, chart_type='line', x_column='x', y_column='y')
 displayHTML(chart.render())
 ```
 
-### Q6: ダッシュボードのレイアウトが崩れる
+### Q: Databricksでどのように使用しますか？
+A: ノートブック内で`displayHTML(component.render())`を呼び出すことで、コンポーネントを表示できます。
 
-**症状:** ダッシュボードのコンポーネントが正しく配置されない
+### Q: 複数のコンポーネントを同時に表示できますか？
+A: はい、`Dashboard`コンポーネントを使用して複数のコンポーネントをレイアウトできます。
 
-**解決方法:**
+## 機能関連
 
-```python
-from db_ui_components import Dashboard, ChartComponent, TableComponent
+### Q: インタラクティブな機能は動作しますか？
+A: はい、Plotly.jsを使用しているため、ズーム、パン、ホバーなどのインタラクティブ機能が利用できます。
 
-# ダッシュボードを作成
-dashboard = Dashboard(title='売上ダッシュボード')
+### Q: データの更新はどうやって行いますか？
+A: `component.update_data(new_df)`でデータを更新し、再度`displayHTML(component.render())`を呼び出してください。
 
-# コンポーネントを追加（位置を明示的に指定）
-chart = ChartComponent(data=df, chart_type='line', x_column='date', y_column='sales')
-table = TableComponent(data=df.head(10))
+### Q: カスタムCSSは適用できますか？
+A: はい、`component.set_style()`でスタイルを設定できます。また、`displayHTML()`に直接CSSを含めることも可能です。
 
-dashboard.add_component(chart, position=(0, 0))  # 1行目、1列目
-dashboard.add_component(table, position=(1, 0))  # 2行目、1列目
+### Q: 高度な可視化コンポーネントはどのようなものがありますか？
+A: サンキーチャート、ヒートマップ、ネットワークグラフ、ツリーマップ、バブルチャートなどの高度な可視化コンポーネントが利用できます。
 
-# 表示
-displayHTML(dashboard.render())
+## パフォーマンス関連
+
+### Q: 大量データを処理できますか？
+A: はい、最適化されたアルゴリズムにより、10,000行以上のデータも効率的に処理できます。
+
+### Q: メモリ使用量はどの程度ですか？
+A: データサイズに応じて変動しますが、一般的な使用では数百MB程度です。
+
+### Q: レンダリング速度はどの程度ですか？
+A: 5,000行のデータで約10秒以内、1,000行のデータで約5秒以内を目標としています。
+
+## セキュリティ関連
+
+### Q: セキュリティ対策はされていますか？
+A: はい、XSS攻撃防止、入力値サニタイゼーション、HTMLエスケープ処理などのセキュリティ対策を実装しています。
+
+### Q: データは安全に処理されますか？
+A: はい、データの暗号化や安全な転送を実装しています。
+
+## トラブルシューティング
+
+### Q: グラフが表示されません
+A: 以下を確認してください：
+1. データが正しく読み込まれているか
+2. 列名が正しく指定されているか
+3. グラフタイプが正しく指定されているか
+
+### Q: テーブルが正しく表示されません
+A: 以下を確認してください：
+1. データフレームの構造
+2. 列名の指定
+3. ページネーション設定
+
+### Q: フィルターが動作しません
+A: 以下を確認してください：
+1. フィルタータイプの指定
+2. オプションの設定
+3. イベントハンドラーの設定
+
+## 開発関連
+
+### Q: 新しいコンポーネントを追加したい
+A: [コントリビューションガイド](../development/contributing.md)を参照してください。
+
+### Q: テストを実行したい
+A: 以下のコマンドを使用してください：
+```bash
+pytest tests/
 ```
 
-## 🔧 デバッグのヒント
+### Q: ドキュメントを改善したい
+A: [コントリビューションガイド](../development/contributing.md)を参照してください。
 
-### 1. データの確認
+## サポート
 
-```python
-# データの基本情報を確認
-print(f"データ形状: {df.shape}")
-print(f"データ型: {df.dtypes}")
-print(f"NULL値: {df.isnull().sum()}")
-print(f"サンプルデータ:\n{df.head()}")
-```
+### Q: 問題が解決しません
+A: 以下をご確認ください：
+1. [エラーリファレンス](errors.md)
+2. [GitHub Issues](https://github.com/y-nishizaki/db-ui-components/issues)
+3. 環境情報の提供
 
-### 2. コンポーネントの確認
+### Q: 機能要望があります
+A: [GitHub Issues](https://github.com/y-nishizaki/db-ui-components/issues)で報告してください。
 
-```python
-# コンポーネントの設定を確認
-print(f"グラフタイプ: {chart.chart_type}")
-print(f"X軸列: {chart.x_column}")
-print(f"Y軸列: {chart.y_column}")
-print(f"データ行数: {len(chart.data)}")
-```
-
-### 3. HTML出力の確認
-
-```python
-# 生成されたHTMLを確認
-html_output = chart.render()
-print("生成されたHTML（最初の500文字）:")
-print(html_output[:500])
-```
-
-## 📞 サポート
-
-問題が解決しない場合は、以下の情報を含めて報告してください：
-
-1. **エラーメッセージ**（完全なエラーメッセージ）
-2. **使用しているコード**
-3. **データのサンプル**
-4. **環境情報**（Pythonバージョン、ライブラリバージョン）
-
-**関連リンク:**
-- [エラーリファレンス](./errors.md) - 詳細なエラー説明
-- [デバッグガイド](./debugging.md) - デバッグの方法
-- [パフォーマンス最適化](../guides/performance.md) - パフォーマンスの改善
+### Q: バグを報告したい
+A: [GitHub Issues](https://github.com/y-nishizaki/db-ui-components/issues)で詳細を報告してください。

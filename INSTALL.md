@@ -148,6 +148,10 @@ black db_ui_components tests
 pip uninstall db-ui-components
 ```
 
+## 詳細情報
+
+より詳しいインストール方法やトラブルシューティングについては、[詳細インストールガイド](docs/guides/installation.md)をご覧ください。
+
 ## サポート
 
 インストールで問題が発生した場合は、以下をご確認ください：
@@ -157,4 +161,4 @@ pip uninstall db-ui-components
 3. 依存関係の競合
 4. ネットワーク接続（GitHubからのインストール時）
 
-問題が解決しない場合は、GitHubのIssuesページで報告してください。
+問題が解決しない場合は、[GitHubのIssuesページ](https://github.com/y-nishizaki/db-ui-components/issues)で報告してください。

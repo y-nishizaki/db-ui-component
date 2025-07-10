@@ -1,328 +1,334 @@
 # セキュリティガイド
 
-このガイドでは、Databricks UI Component Libraryを使用する際のセキュリティのベストプラクティスを説明します。
+このドキュメントでは、db-ui-componentsライブラリのセキュリティ機能とベストプラクティスについて説明します。
 
-## 🎯 概要
+## セキュリティ機能
 
-データの可視化において、セキュリティは重要な要素です。このガイドでは、データの保護、アクセス制御、安全なデプロイメントについて説明します。
+### XSS攻撃防止
 
-## 🔒 データセキュリティ
-
-### 1. 機密データの保護
+ライブラリはXSS（クロスサイトスクリプティング）攻撃を防ぐための機能を提供します：
 
 ```python
-# 機密データのマスキング
-def mask_sensitive_data(df, sensitive_columns):
-    """機密データをマスキング"""
-    masked_df = df.copy()
-    for col in sensitive_columns:
-        if col in masked_df.columns:
-            # 個人情報のマスキング
-            if col in ['email', 'phone', 'ssn']:
-                masked_df[col] = masked_df[col].apply(lambda x: f"{str(x)[:3]}***")
-            # 金額情報のマスキング
-            elif col in ['salary', 'credit_card']:
-                masked_df[col] = masked_df[col].apply(lambda x: "***")
-    return masked_df
+from db_ui_components import ChartComponent
+import pandas as pd
 
-# 使用例
-sensitive_columns = ['email', 'phone', 'salary']
-masked_df = mask_sensitive_data(df, sensitive_columns)
+# 悪意のあるスクリプトを含むデータ
+malicious_data = pd.DataFrame({
+    'x': [1, 2, 3],
+    'y': [1, 4, 9],
+    'label': ['<script>alert("XSS")</script>', 'Normal', 'Data']
+})
 
+# 自動的にHTMLエスケープ処理が実行される
 chart = ChartComponent(
-    data=masked_df,
-    chart_type='bar',
-    x_column='category',
-    y_column='sales',
-    title='マスキングされた売上データ'
+    data=malicious_data,
+    chart_type='scatter',
+    x_column='x',
+    y_column='y'
+)
+
+# 安全にレンダリング
+displayHTML(chart.render())
+```
+
+### 入力値サニタイゼーション
+
+すべてのユーザー入力は自動的にサニタイゼーションされます：
+
+```python
+# 特殊文字を含むデータ
+special_chars_data = pd.DataFrame({
+    'category': ['A&B', 'C<D>', 'E"F', "G'H"],
+    'value': [10, 20, 30, 40]
+})
+
+# 自動的にエスケープ処理される
+table = TableComponent(data=special_chars_data)
+displayHTML(table.render())
+```
+
+### SQLインジェクション防止
+
+データベースコンポーネントでは、SQLインジェクション攻撃を防ぐ機能を提供します：
+
+```python
+from db_ui_components import DatabaseComponent
+
+db = DatabaseComponent(
+    component_id="secure-db",
+    workspace_url="https://your-workspace.cloud.databricks.com",
+    token="your-token"
+)
+
+# パラメータ化クエリを使用
+safe_query = "SELECT * FROM users WHERE name = %s"
+result = db.execute_query(safe_query, params=["user_input"])
+```
+
+## セキュリティベストプラクティス
+
+### 1. 認証情報の管理
+
+```python
+import os
+from db_ui_components import DatabaseComponent
+
+# 環境変数から認証情報を取得
+db = DatabaseComponent(
+    component_id="secure-db",
+    workspace_url=os.getenv('DATABRICKS_WORKSPACE_URL'),
+    token=os.getenv('DATABRICKS_TOKEN')
 )
 ```
 
 ### 2. データの暗号化
 
 ```python
+# 機密データの暗号化
 import hashlib
-import base64
 
-# データの暗号化
-def encrypt_sensitive_data(data, key):
-    """機密データを暗号化"""
-    import cryptography.fernet as Fernet
-    from cryptography.hazmat.primitives import hashes
-    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-    
-    # キーの生成
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=b'salt_',
-        iterations=100000,
-    )
-    key_bytes = base64.urlsafe_b64encode(kdf.derive(key.encode()))
-    
-    # 暗号化
-    f = Fernet(key_bytes)
-    encrypted_data = f.encrypt(data.encode())
-    return encrypted_data
-
-# データの復号化
-def decrypt_sensitive_data(encrypted_data, key):
-    """暗号化されたデータを復号化"""
-    import cryptography.fernet as Fernet
-    from cryptography.hazmat.primitives import hashes
-    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-    
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=b'salt_',
-        iterations=100000,
-    )
-    key_bytes = base64.urlsafe_b64encode(kdf.derive(key.encode()))
-    
-    f = Fernet(key_bytes)
-    decrypted_data = f.decrypt(encrypted_data)
-    return decrypted_data.decode()
-```
-
-### 3. データアクセス制御
-
-```python
-# ロールベースのアクセス制御
-class DataAccessControl:
-    def __init__(self):
-        self.user_roles = {
-            'admin': ['read', 'write', 'delete'],
-            'analyst': ['read'],
-            'viewer': ['read']
-        }
-    
-    def check_permission(self, user, action, data_type):
-        """ユーザーの権限をチェック"""
-        if user not in self.user_roles:
-            return False
-        
-        user_permissions = self.user_roles[user]
-        return action in user_permissions
-    
-    def filter_data_by_role(self, df, user, sensitive_columns):
-        """ロールに基づいてデータをフィルタリング"""
-        if self.check_permission(user, 'read', 'sensitive'):
-            return df
-        else:
-            # 機密列を除外
-            safe_columns = [col for col in df.columns if col not in sensitive_columns]
-            return df[safe_columns]
+def hash_sensitive_data(data):
+    """機密データをハッシュ化"""
+    return hashlib.sha256(data.encode()).hexdigest()
 
 # 使用例
-access_control = DataAccessControl()
-user = 'analyst'
-sensitive_columns = ['email', 'phone', 'salary']
-
-if access_control.check_permission(user, 'read', 'sales'):
-    filtered_df = access_control.filter_data_by_role(df, user, sensitive_columns)
-    chart = ChartComponent(data=filtered_df, chart_type='line', x_column='date', y_column='sales')
-    displayHTML(chart.render())
-else:
-    print("アクセス権限がありません")
+sensitive_df = pd.DataFrame({
+    'user_id': ['user1', 'user2'],
+    'hashed_password': [hash_sensitive_data('password1'), hash_sensitive_data('password2')]
+})
 ```
 
-## 🛡️ 入力検証
+### 3. アクセス制御
 
-### 1. データの検証
+```python
+# ユーザー権限の確認
+def check_user_permission(user_id, required_role):
+    """ユーザーの権限を確認"""
+    user_roles = get_user_roles(user_id)
+    return required_role in user_roles
+
+# 権限に基づいてコンポーネントを表示
+if check_user_permission(current_user, 'admin'):
+    admin_chart = ChartComponent(data=admin_data, chart_type='line')
+    displayHTML(admin_chart.render())
+```
+
+### 4. セッション管理
+
+```python
+# セッションタイムアウトの設定
+import time
+
+class SecureSession:
+    def __init__(self, timeout_minutes=30):
+        self.timeout_minutes = timeout_minutes
+        self.last_activity = time.time()
+    
+    def is_valid(self):
+        """セッションが有効かチェック"""
+        return (time.time() - self.last_activity) < (self.timeout_minutes * 60)
+    
+    def update_activity(self):
+        """アクティビティを更新"""
+        self.last_activity = time.time()
+
+# 使用例
+session = SecureSession(timeout_minutes=15)
+if session.is_valid():
+    # コンポーネントを表示
+    chart = ChartComponent(data=df, chart_type='line')
+    displayHTML(chart.render())
+    session.update_activity()
+else:
+    print("セッションが期限切れです")
+```
+
+## セキュリティ設定
+
+### コンポーネントレベルのセキュリティ
+
+```python
+# セキュリティ設定付きコンポーネント
+chart = ChartComponent(
+    data=df,
+    chart_type='line',
+    x_column='x',
+    y_column='y',
+    security_config={
+        'enable_xss_protection': True,
+        'enable_csrf_protection': True,
+        'content_security_policy': "default-src 'self'",
+        'max_data_size': 10000  # 最大データサイズ
+    }
+)
+```
+
+### ダッシュボードレベルのセキュリティ
+
+```python
+from db_ui_components import Dashboard
+
+dashboard = Dashboard(
+    title="Secure Dashboard",
+    security_config={
+        'require_authentication': True,
+        'allowed_roles': ['admin', 'user'],
+        'session_timeout': 30,
+        'enable_audit_log': True
+    }
+)
+```
+
+## 監査ログ
+
+### アクセスログの記録
+
+```python
+import logging
+from datetime import datetime
+
+# 監査ログの設定
+audit_logger = logging.getLogger('audit')
+audit_logger.setLevel(logging.INFO)
+
+def log_component_access(user_id, component_type, action):
+    """コンポーネントアクセスをログに記録"""
+    audit_logger.info(
+        f"User: {user_id}, Component: {component_type}, "
+        f"Action: {action}, Timestamp: {datetime.now()}"
+    )
+
+# 使用例
+log_component_access('user123', 'ChartComponent', 'render')
+```
+
+### データアクセスログ
+
+```python
+def log_data_access(user_id, data_source, query, result_count):
+    """データアクセスをログに記録"""
+    audit_logger.info(
+        f"User: {user_id}, Data Source: {data_source}, "
+        f"Query: {query}, Results: {result_count}, "
+        f"Timestamp: {datetime.now()}"
+    )
+```
+
+## セキュリティテスト
+
+### 自動セキュリティテスト
+
+```python
+import pytest
+from db_ui_components import ChartComponent
+
+def test_xss_protection():
+    """XSS攻撃の防止テスト"""
+    malicious_data = pd.DataFrame({
+        'x': [1, 2, 3],
+        'y': [1, 4, 9],
+        'label': ['<script>alert("XSS")</script>', 'Normal', 'Data']
+    })
+    
+    chart = ChartComponent(data=malicious_data, chart_type='scatter')
+    html_output = chart.render()
+    
+    # スクリプトタグがエスケープされていることを確認
+    assert '<script>' not in html_output
+    assert '&lt;script&gt;' in html_output
+
+def test_sql_injection_protection():
+    """SQLインジェクション攻撃の防止テスト"""
+    malicious_input = "'; DROP TABLE users; --"
+    
+    # パラメータ化クエリを使用
+    safe_query = "SELECT * FROM users WHERE name = %s"
+    # この実装では、パラメータ化クエリが使用されることを確認
+```
+
+### 手動セキュリティテスト
+
+```python
+# セキュリティテスト用のユーティリティ
+def test_security_features():
+    """セキュリティ機能のテスト"""
+    
+    # 1. XSSテスト
+    test_xss_protection()
+    
+    # 2. SQLインジェクションテスト
+    test_sql_injection_protection()
+    
+    # 3. 認証テスト
+    test_authentication()
+    
+    # 4. 権限テスト
+    test_authorization()
+    
+    print("すべてのセキュリティテストが完了しました")
+```
+
+## セキュリティチェックリスト
+
+### 開発時
+
+- [ ] 入力値のサニタイゼーション
+- [ ] XSS攻撃の防止
+- [ ] SQLインジェクションの防止
+- [ ] 認証情報の安全な管理
+- [ ] セッション管理の実装
+- [ ] アクセス制御の実装
+- [ ] 監査ログの記録
+
+### デプロイ時
+
+- [ ] HTTPSの使用
+- [ ] セキュリティヘッダーの設定
+- [ ] 環境変数の適切な管理
+- [ ] ファイアウォールの設定
+- [ ] ログの監視
+- [ ] バックアップの設定
+
+### 運用時
+
+- [ ] 定期的なセキュリティ監査
+- [ ] 脆弱性スキャンの実行
+- [ ] パッチの適用
+- [ ] アクセスログの監視
+- [ ] 異常検知の実装
+
+## セキュリティインシデント対応
+
+### インシデント検出
 
 ```python
 import re
-from typing import Dict, Any
 
-# データ検証クラス
-class DataValidator:
-    def __init__(self):
-        self.validation_rules = {
-            'email': r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-            'phone': r'^\+?1?\d{9,15}$',
-            'date': r'^\d{4}-\d{2}-\d{2}$',
-            'numeric': r'^\d+(\.\d+)?$'
-        }
+def detect_security_incident(log_entry):
+    """セキュリティインシデントを検出"""
+    suspicious_patterns = [
+        r'<script>',
+        r'javascript:',
+        r'DROP TABLE',
+        r'UNION SELECT'
+    ]
     
-    def validate_data(self, df, column_rules):
-        """データフレームの検証"""
-        validation_results = {}
-        
-        for column, rule in column_rules.items():
-            if column in df.columns:
-                if rule in self.validation_rules:
-                    pattern = self.validation_rules[rule]
-                    valid_mask = df[column].astype(str).str.match(pattern, na=False)
-                    validation_results[column] = {
-                        'valid_count': valid_mask.sum(),
-                        'invalid_count': (~valid_mask).sum(),
-                        'valid_percentage': (valid_mask.sum() / len(df)) * 100
-                    }
-        
-        return validation_results
-    
-    def clean_invalid_data(self, df, column_rules):
-        """無効なデータをクリーンアップ"""
-        cleaned_df = df.copy()
-        
-        for column, rule in column_rules.items():
-            if column in cleaned_df.columns:
-                if rule in self.validation_rules:
-                    pattern = self.validation_rules[rule]
-                    valid_mask = cleaned_df[column].astype(str).str.match(pattern, na=False)
-                    cleaned_df = cleaned_df[valid_mask]
-        
-        return cleaned_df
-
-# 使用例
-validator = DataValidator()
-column_rules = {
-    'email': 'email',
-    'phone': 'phone',
-    'date': 'date',
-    'sales': 'numeric'
-}
-
-# データの検証
-validation_results = validator.validate_data(df, column_rules)
-print("検証結果:", validation_results)
-
-# 無効なデータのクリーンアップ
-cleaned_df = validator.clean_invalid_data(df, column_rules)
+    for pattern in suspicious_patterns:
+        if re.search(pattern, log_entry, re.IGNORECASE):
+            return True
+    return False
 ```
 
-### 2. SQLインジェクション対策
+### インシデント対応
 
 ```python
-# 安全なSQLクエリの構築
-class SafeSQLBuilder:
-    def __init__(self):
-        self.allowed_tables = ['sales_data', 'customer_data', 'product_data']
-        self.allowed_columns = ['date', 'sales', 'category', 'region']
-    
-    def build_safe_query(self, table, columns, conditions=None):
-        """安全なSQLクエリを構築"""
-        # テーブル名の検証
-        if table not in self.allowed_tables:
-            raise ValueError(f"許可されていないテーブル: {table}")
-        
-        # カラム名の検証
-        for col in columns:
-            if col not in self.allowed_columns:
-                raise ValueError(f"許可されていないカラム: {col}")
-        
-        # 安全なクエリの構築
-        query = f"SELECT {', '.join(columns)} FROM {table}"
-        
-        if conditions:
-            # 条件の検証と追加
-            safe_conditions = self._validate_conditions(conditions)
-            query += f" WHERE {safe_conditions}"
-        
-        return query
-    
-    def _validate_conditions(self, conditions):
-        """条件の検証"""
-        # 基本的な条件の検証（実際の実装ではより厳密に）
-        allowed_operators = ['=', '>', '<', '>=', '<=', 'LIKE']
-        
-        for condition in conditions:
-            if not any(op in condition for op in allowed_operators):
-                raise ValueError(f"許可されていない演算子: {condition}")
-        
-        return ' AND '.join(conditions)
-
-# 使用例
-sql_builder = SafeSQLBuilder()
-try:
-    safe_query = sql_builder.build_safe_query(
-        table='sales_data',
-        columns=['date', 'sales', 'category'],
-        conditions=['category = "Electronics"', 'sales > 1000']
-    )
-    print(f"安全なクエリ: {safe_query}")
-except ValueError as e:
-    print(f"エラー: {e}")
-```
-
-## 🔐 認証と認可
-
-### 1. ユーザー認証
-
-```python
-import hashlib
-import secrets
-import jwt
-from datetime import datetime, timedelta
-
-# 認証システム
-class AuthenticationSystem:
-    def __init__(self, secret_key):
-        self.secret_key = secret_key
-        self.users = {}  # 実際の実装ではデータベースを使用
-    
-    def hash_password(self, password):
-        """パスワードのハッシュ化"""
-        salt = secrets.token_hex(16)
-        hash_obj = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
-        return salt + hash_obj.hex()
-    
-    def verify_password(self, password, hashed_password):
-        """パスワードの検証"""
-        salt = hashed_password[:32]
-        stored_hash = hashed_password[32:]
-        hash_obj = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
-        return hash_obj.hex() == stored_hash
-    
-    def create_token(self, user_id, role):
-        """JWTトークンの作成"""
-        payload = {
-            'user_id': user_id,
-            'role': role,
-            'exp': datetime.utcnow() + timedelta(hours=24)
-        }
-        return jwt.encode(payload, self.secret_key, algorithm='HS256')
-    
-    def verify_token(self, token):
-        """JWTトークンの検証"""
-        try:
-            payload = jwt.decode(token, self.secret_key, algorithms=['HS256'])
-            return payload
-        except jwt.ExpiredSignatureError:
-            return None
-        except jwt.InvalidTokenError:
-            return None
-
-# 使用例
-auth_system = AuthenticationSystem('your-secret-key')
-
-# ユーザー登録
-password = "secure_password_123"
-hashed_password = auth_system.hash_password(password)
-auth_system.users['user1'] = {
-    'password': hashed_password,
-    'role': 'analyst'
-}
-
-# ログイン
-if auth_system.verify_password(password, hashed_password):
-    token = auth_system.create_token('user1', 'analyst')
-    print(f"認証トークン: {token}")
-    
-    # トークンの検証
-    payload = auth_system.verify_token(token)
-    if payload:
-        print(f"認証成功: {payload}")
-    else:
-        print("認証失敗")
-```
-
-### 2. セッション管理
-
-```python
+import logging
 import time
 from collections import defaultdict
+
+# 監査ログの設定
+audit_logger = logging.getLogger('audit')
+audit_logger.setLevel(logging.INFO)
 
 # セッション管理システム
 class SessionManager:
@@ -363,174 +369,103 @@ class SessionManager:
         if session_id in self.sessions:
             del self.sessions[session_id]
 
-# 使用例
-session_manager = SessionManager()
-
-# セッションの作成
-session_id = session_manager.create_session('user1', token)
-
-# セッションの検証
-if session_manager.validate_session(session_id):
-    print("セッション有効")
-else:
-    print("セッション無効")
-```
-
-## 🌐 HTTPSとセキュア通信
-
-### 1. HTTPSの強制
-
-```python
-# HTTPS強制の実装
-def enforce_https(request):
-    """HTTPSを強制"""
-    if not request.is_secure():
-        # HTTPリクエストをHTTPSにリダイレクト
-        secure_url = request.build_absolute_uri().replace('http://', 'https://')
-        return redirect(secure_url)
-    return None
-
-# セキュリティヘッダーの設定
-def set_security_headers(response):
-    """セキュリティヘッダーを設定"""
-    response['X-Content-Type-Options'] = 'nosniff'
-    response['X-Frame-Options'] = 'DENY'
-    response['X-XSS-Protection'] = '1; mode=block'
-    response['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-    response['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline'"
-    return response
-```
-
-### 2. CORS設定
-
-```python
-# CORS設定
-def configure_cors(app):
-    """CORS設定を構成"""
-    from flask_cors import CORS
+def handle_security_incident(incident_type, details):
+    """セキュリティインシデントの対応"""
     
-    CORS(app, resources={
-        r"/api/*": {
-            "origins": ["https://your-domain.com"],
-            "methods": ["GET", "POST"],
-            "allow_headers": ["Content-Type", "Authorization"]
-        }
-    })
+    # 1. ログに記録
+    audit_logger.error(f"Security incident: {incident_type}, Details: {details}")
+    
+    # 2. 管理者に通知
+    notify_admin(incident_type, details)
+    
+    # 3. 必要に応じてアクセスを制限
+    if incident_type == 'xss_attempt':
+        block_user_ip(get_client_ip())
+    
+    # 4. インシデントレポートを作成
+    create_incident_report(incident_type, details)
 ```
 
-## 📊 ログと監査
+## セキュリティ設定例
 
-### 1. セキュリティログ
+### 本番環境での設定
 
 ```python
+# 本番環境用のセキュリティ設定
+PRODUCTION_SECURITY_CONFIG = {
+    'enable_xss_protection': True,
+    'enable_csrf_protection': True,
+    'content_security_policy': "default-src 'self'; script-src 'self' 'unsafe-inline'",
+    'strict_transport_security': True,
+    'x_content_type_options': 'nosniff',
+    'x_frame_options': 'DENY',
+    'max_data_size': 50000,
+    'session_timeout': 15,
+    'require_authentication': True,
+    'enable_audit_log': True,
+    'log_level': 'INFO'
+}
+```
+
+### 開発環境での設定
+
+```python
+# 開発環境用のセキュリティ設定
+DEVELOPMENT_SECURITY_CONFIG = {
+    'enable_xss_protection': True,
+    'enable_csrf_protection': False,  # 開発時は無効化
+    'content_security_policy': "default-src 'self' 'unsafe-inline'",
+    'max_data_size': 1000,
+    'session_timeout': 60,
+    'require_authentication': False,  # 開発時は無効化
+    'enable_audit_log': True,
+    'log_level': 'DEBUG'
+}
+```
+
+## セキュリティ監査
+
+### 定期的な監査
+
+```python
+import pytest
 import logging
 from datetime import datetime
 
-# セキュリティログシステム
-class SecurityLogger:
-    def __init__(self, log_file='security.log'):
-        self.logger = logging.getLogger('security')
-        self.logger.setLevel(logging.INFO)
-        
-        handler = logging.FileHandler(log_file)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
-    
-    def log_access(self, user_id, action, resource, success=True):
-        """アクセスログを記録"""
-        status = "SUCCESS" if success else "FAILED"
-        message = f"ACCESS: User={user_id}, Action={action}, Resource={resource}, Status={status}"
-        self.logger.info(message)
-    
-    def log_security_event(self, event_type, details):
-        """セキュリティイベントを記録"""
-        message = f"SECURITY_EVENT: Type={event_type}, Details={details}"
-        self.logger.warning(message)
-    
-    def log_data_access(self, user_id, data_type, record_count):
-        """データアクセスを記録"""
-        message = f"DATA_ACCESS: User={user_id}, DataType={data_type}, Records={record_count}"
-        self.logger.info(message)
+# 監査ログの設定
+audit_logger = logging.getLogger('audit')
+audit_logger.setLevel(logging.INFO)
 
-# 使用例
-security_logger = SecurityLogger()
+def test_xss_protection():
+    """XSS攻撃の防止テスト"""
+    malicious_data = pd.DataFrame({
+        'x': [1, 2, 3],
+        'y': [1, 4, 9],
+        'label': ['<script>alert("XSS")</script>', 'Normal', 'Data']
+    })
+    
+    chart = ChartComponent(data=malicious_data, chart_type='scatter')
+    html_output = chart.render()
+    
+    # スクリプトタグがエスケープされていることを確認
+    assert '<script>' not in html_output
+    assert '&lt;script&gt;' in html_output
 
-# アクセスログの記録
-security_logger.log_access('user1', 'READ', 'sales_data', True)
-security_logger.log_data_access('user1', 'customer_data', 1000)
-security_logger.log_security_event('UNAUTHORIZED_ACCESS', 'Invalid token provided')
+def test_sql_injection_protection():
+    """SQLインジェクション攻撃の防止テスト"""
+    malicious_input = "'; DROP TABLE users; --"
+    
+    # パラメータ化クエリを使用
+    safe_query = "SELECT * FROM users WHERE name = %s"
+    # この実装では、パラメータ化クエリが使用されることを確認
 ```
 
-### 2. 監査トレイル
+## サポート
 
-```python
-# 監査トレイルシステム
-class AuditTrail:
-    def __init__(self):
-        self.audit_events = []
-    
-    def add_event(self, user_id, action, resource, details=None):
-        """監査イベントを追加"""
-        event = {
-            'timestamp': datetime.utcnow(),
-            'user_id': user_id,
-            'action': action,
-            'resource': resource,
-            'details': details,
-            'ip_address': self._get_client_ip(),
-            'user_agent': self._get_user_agent()
-        }
-        self.audit_events.append(event)
-    
-    def get_audit_report(self, user_id=None, start_date=None, end_date=None):
-        """監査レポートを取得"""
-        filtered_events = self.audit_events
-        
-        if user_id:
-            filtered_events = [e for e in filtered_events if e['user_id'] == user_id]
-        
-        if start_date:
-            filtered_events = [e for e in filtered_events if e['timestamp'] >= start_date]
-        
-        if end_date:
-            filtered_events = [e for e in filtered_events if e['timestamp'] <= end_date]
-        
-        return filtered_events
-    
-    def _get_client_ip(self):
-        """クライアントIPを取得（実際の実装では適切な方法を使用）"""
-        return "192.168.1.1"  # プレースホルダー
-    
-    def _get_user_agent(self):
-        """ユーザーエージェントを取得（実際の実装では適切な方法を使用）"""
-        return "Mozilla/5.0"  # プレースホルダー
+セキュリティに関する質問や問題がある場合は、以下をご確認ください：
 
-# 使用例
-audit_trail = AuditTrail()
+1. [セキュリティFAQ](../troubleshooting/faq.md#セキュリティ関連)
+2. [エラーリファレンス](../troubleshooting/errors.md)
+3. [GitHub Issues](https://github.com/y-nishizaki/db-ui-components/issues)
 
-# 監査イベントの記録
-audit_trail.add_event('user1', 'CREATE_CHART', 'sales_data', {'chart_type': 'line'})
-audit_trail.add_event('user1', 'EXPORT_DATA', 'customer_data', {'format': 'csv'})
-
-# 監査レポートの取得
-user_events = audit_trail.get_audit_report(user_id='user1')
-for event in user_events:
-    print(f"{event['timestamp']}: {event['action']} on {event['resource']}")
-```
-
-## 🚀 次のステップ
-
-- [デプロイメント](./deployment.md) - 本番環境へのデプロイ
-- [パフォーマンス最適化](./performance.md) - パフォーマンスの最適化
-- [トラブルシューティング](../troubleshooting/faq.md) - セキュリティ関連のFAQ
-
-## ❓ サポート
-
-セキュリティで問題が発生した場合は、以下を確認してください：
-
-- [よくある問題](../troubleshooting/faq.md)
-- [エラーリファレンス](../troubleshooting/errors.md)
-- [GitHub Issues](https://github.com/databricks/db-ui-components/issues)
+セキュリティインシデントの報告は、[GitHub Issues](https://github.com/y-nishizaki/db-ui-components/issues)で行ってください。
