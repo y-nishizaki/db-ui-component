@@ -82,8 +82,8 @@ class DatabaseComponent(BaseComponent):
         }
 
         # キャッシュ
-        self._query_cache = {}
-        self._cache_timestamps = {}
+        self._query_cache: Dict[str, pd.DataFrame] = {}
+        self._cache_timestamps: Dict[str, float] = {}
 
         # 初期化
         self._initialize_connection()
@@ -346,7 +346,11 @@ class DatabaseComponent(BaseComponent):
                         html.H4("Connection Status"),
                         html.Div(
                             id=f"{self.component_id}-connection-status",
-                            className="status-indicator",
+                            style={
+                                "padding": "10px",
+                                "margin": "10px 0",
+                                "border-radius": "5px",
+                            },
                         ),
                     ]
                 ),
@@ -398,26 +402,6 @@ class DatabaseComponent(BaseComponent):
                         html.Div(id=f"{self.component_id}-table-stats"),
                     ]
                 ),
-                # スタイル
-                html.Style(
-                    """
-                .status-indicator {
-                    padding: 10px;
-                    margin: 10px 0;
-                    border-radius: 5px;
-                }
-                .status-connected {
-                    background-color: #d4edda;
-                    color: #155724;
-                    border: 1px solid #c3e6cb;
-                }
-                .status-disconnected {
-                    background-color: #f8d7da;
-                    color: #721c24;
-                    border: 1px solid #f5c6cb;
-                }
-            """
-                ),
             ]
         )
 
@@ -431,18 +415,30 @@ class DatabaseComponent(BaseComponent):
 
         @app.callback(
             Output(f"{self.component_id}-connection-status", "children"),
-            Output(f"{self.component_id}-connection-status", "className"),
+            Output(f"{self.component_id}-connection-status", "style"),
             Input(f"{self.component_id}-execute-btn", "n_clicks"),
             Input(f"{self.component_id}-refresh-tables-btn", "n_clicks"),
         )
         def update_connection_status(execute_clicks, refresh_clicks):
+            base_style = {
+                "padding": "10px",
+                "margin": "10px 0",
+                "border-radius": "5px",
+            }
             if self.connection:
-                return "Connected to Databricks", "status-indicator status-connected"
+                return "Connected to Databricks", {
+                    **base_style,
+                    "background-color": "#d4edda",
+                    "color": "#155724",
+                    "border": "1px solid #c3e6cb",
+                }
             else:
-                return (
-                    "Not connected to Databricks",
-                    "status-indicator status-disconnected",
-                )
+                return "Not connected to Databricks", {
+                    **base_style,
+                    "background-color": "#f8d7da",
+                    "color": "#721c24",
+                    "border": "1px solid #f5c6cb",
+                }
 
         @app.callback(
             Output(f"{self.component_id}-query-results", "children"),
@@ -729,9 +725,14 @@ class SparkComponent(BaseComponent):
                             "Spark session initialized"
                             if self.spark_session
                             else "No Spark session",
-                            className="status-indicator status-connected"
-                            if self.spark_session
-                            else "status-indicator status-disconnected",
+                            style={
+                                "padding": "10px",
+                                "margin": "10px 0",
+                                "border-radius": "5px",
+                                "background-color": "#d4edda" if self.spark_session else "#f8d7da",
+                                "color": "#155724" if self.spark_session else "#721c24",
+                                "border": "1px solid #c3e6cb" if self.spark_session else "1px solid #f5c6cb",
+                            },
                         ),
                     ]
                 ),

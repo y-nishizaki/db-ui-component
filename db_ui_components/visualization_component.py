@@ -577,7 +577,7 @@ class BubbleChartComponent(BaseComponent):
             "marker": {
                 "size": normalized_sizes.tolist(),
                 "sizemode": "area",
-                "sizeref": 2 * max(normalized_sizes) / (40**2),
+                "sizeref": 2 * float(normalized_sizes.max()) / (40**2),
                 "sizemin": 4,
             },
             "text": data[self.size_column].tolist(),
