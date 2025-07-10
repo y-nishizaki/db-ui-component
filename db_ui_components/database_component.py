@@ -26,7 +26,6 @@ except ImportError:
 
 try:
     from pyspark.sql import SparkSession
-    pass
 
     PYSPARK_AVAILABLE = True
 except ImportError:
