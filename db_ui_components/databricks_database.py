@@ -57,8 +57,8 @@ class DatabricksDatabaseComponent(BaseComponent):
         }
 
         # キャッシュ
-        self._query_cache = {}
-        self._cache_timestamps = {}
+        self._query_cache: Dict[str, pd.DataFrame] = {}
+        self._cache_timestamps: Dict[str, float] = {}
 
         # 初期化
         self._initialize_spark()

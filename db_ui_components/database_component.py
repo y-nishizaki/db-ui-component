@@ -13,13 +13,16 @@ from .base_component import BaseComponent
 from .exceptions import ComponentError
 
 try:
-    from databricks import sql
+    from databricks.sql import connect as sql_connect
     from databricks.sdk import WorkspaceClient
     from databricks.sdk.core import Config
 
     DATABRICKS_AVAILABLE = True
 except ImportError:
     DATABRICKS_AVAILABLE = False
+    sql_connect = None  # type: ignore
+    WorkspaceClient = None  # type: ignore
+    Config = None  # type: ignore
     logging.warning(
         "Databricks SDK not available. Install with: pip install databricks-sdk"
     )
@@ -97,11 +100,12 @@ class DatabaseComponent(BaseComponent):
                 self.workspace_client = WorkspaceClient(config=config)
 
                 # SQL接続の初期化
-                self.connection = sql.connect(
-                    server_hostname=self.workspace_url.replace("https://", ""),
-                    http_path="/sql/1.0/warehouses/your-warehouse-id",  # 実際のウェアハウスIDに変更
-                    access_token=self.token,
-                )
+                if sql_connect:
+                    self.connection = sql_connect(
+                        server_hostname=self.workspace_url.replace("https://", ""),
+                        http_path="/sql/1.0/warehouses/your-warehouse-id",  # 実際のウェアハウスIDに変更
+                        access_token=self.token,
+                    )
 
                 logging.info(
                     f"Databricks connection established to {self.workspace_url}"

@@ -44,7 +44,7 @@ class NetworkGraphComponent(BaseVisualizationComponent):
         self.target_column = target_column
         self.weight_column = weight_column
 
-    def _prepare_chart_data(self, data: pd.DataFrame) -> List[Dict[str, Any]]:
+    def _prepare_chart_data(self, data: pd.DataFrame) -> Dict[str, Any]:
         """
         ネットワークグラフ用のデータを準備
 
@@ -107,7 +107,7 @@ class NetworkGraphComponent(BaseVisualizationComponent):
             "name": "Edges",
         }
 
-        return [edge_trace, node_trace]
+        return {"traces": [edge_trace, node_trace]}
 
     def _get_chart_type(self) -> str:
         """
@@ -118,7 +118,7 @@ class NetworkGraphComponent(BaseVisualizationComponent):
         """
         return "network-graph"
 
-    def _generate_html_template(self, chart_data: List[Dict[str, Any]]) -> str:
+    def _generate_html_template(self, chart_data: Dict[str, Any]) -> str:
         """
         ネットワークグラフ用のHTMLテンプレートを生成
 
@@ -134,7 +134,7 @@ class NetworkGraphComponent(BaseVisualizationComponent):
         html = f"""
         <div id="{div_id}" style="width: 100%; height: {self.height}px;"></div>
         <script>
-            const data = {chart_data};
+            const data = {json.dumps(chart_data['traces'])};
 
             const layout = {{
                 title: '{self.title}',

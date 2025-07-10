@@ -61,7 +61,7 @@ class BubbleChartComponent(BaseVisualizationComponent):
         sizes = data[self.size_column].values
         normalized_sizes = np.array(sizes) * 10 + 10  # 簡易的な正規化
 
-        bubble_data = {
+        bubble_data: Dict[str, Any] = {
             "type": "scatter",
             "x": data[self.x_column].tolist(),
             "y": data[self.y_column].tolist(),
