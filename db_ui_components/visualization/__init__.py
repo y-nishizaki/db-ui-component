@@ -13,7 +13,7 @@ from .bubble_chart import BubbleChartComponent
 
 __all__ = [
     "SankeyChartComponent",
-    "HeatmapComponent", 
+    "HeatmapComponent",
     "NetworkGraphComponent",
     "TreemapComponent",
     "BubbleChartComponent",

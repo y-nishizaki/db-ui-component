@@ -19,14 +19,14 @@ from .databricks_database import (
     execute_sql,
     get_tables,
     preview_table,
-    get_table_stats
+    get_table_stats,
 )
 from .visualization import (
     SankeyChartComponent,
     HeatmapComponent,
     NetworkGraphComponent,
     TreemapComponent,
-    BubbleChartComponent
+    BubbleChartComponent,
 )
 
 __version__ = "1.0.0"
@@ -37,7 +37,7 @@ __url__ = "https://github.com/y-nishizaki/db-ui-components"
 
 __all__ = [
     "ChartComponent",
-    "TableComponent", 
+    "TableComponent",
     "FilterComponent",
     "Dashboard",
     "DatabaseComponent",
@@ -53,4 +53,4 @@ __all__ = [
     "NetworkGraphComponent",
     "TreemapComponent",
     "BubbleChartComponent",
-] 
+]

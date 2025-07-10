@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pushover:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(source:*)",
+      "Bash(black:*)",
+      "Bash(python:*)",
+      "Bash(pip install black flake8)",
+      "Bash(flake8:*)",
+      "Bash(grep:*)",
+      "Bash(sed:*)",
+      "Bash(pip install:*)",
+      "Bash(autopep8:*)",
+      "Bash(pip uninstall:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": []
+  }
+}

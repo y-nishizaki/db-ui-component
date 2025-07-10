@@ -8,13 +8,12 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 from typing import Optional, Dict, Any, Callable
-import json
 
 
 class ChartComponent:
     """
     Databricksダッシュボード用のグラフ・チャートコンポーネント
-    
+
     サポートするグラフタイプ:
     - line: 折れ線グラフ
     - bar: 棒グラフ
@@ -22,7 +21,7 @@ class ChartComponent:
     - scatter: 散布図
     - heatmap: ヒートマップ
     """
-    
+
     def __init__(
         self,
         data: pd.DataFrame,
@@ -31,11 +30,11 @@ class ChartComponent:
         y_column: Optional[str] = None,
         title: Optional[str] = None,
         height: int = 400,
-        **kwargs
+        **kwargs,
     ):
         """
         初期化
-        
+
         Args:
             data: データフレーム
             chart_type: グラフタイプ ('line', 'bar', 'pie', 'scatter', 'heatmap')
@@ -53,26 +52,24 @@ class ChartComponent:
         self.height = height
         self.kwargs = kwargs
         self._click_handlers = []
-        
+
     def render(self) -> str:
         """
         グラフをHTMLとしてレンダリング
-        
+
         Returns:
             HTML文字列
         """
         fig = self._create_figure()
-        
+
         # カスタムスタイルの適用
-        if hasattr(self, '_custom_style'):
+        if hasattr(self, "_custom_style"):
             fig.update_layout(**self._custom_style)
-            
+
         return fig.to_html(
-            include_plotlyjs=True,
-            full_html=False,
-            config={'displayModeBar': True}
+            include_plotlyjs=True, full_html=False, config={"displayModeBar": True}
         )
-    
+
     def _create_figure(self) -> go.Figure:
         """グラフを作成"""
         if self.chart_type == "line":
@@ -87,31 +84,23 @@ class ChartComponent:
             return self._create_heatmap()
         else:
             raise ValueError(f"Unsupported chart type: {self.chart_type}")
-    
+
     def _create_line_chart(self) -> go.Figure:
         """折れ線グラフを作成"""
         fig = px.line(
-            self.data,
-            x=self.x_column,
-            y=self.y_column,
-            title=self.title,
-            **self.kwargs
+            self.data, x=self.x_column, y=self.y_column, title=self.title, **self.kwargs
         )
         fig.update_layout(height=self.height)
         return fig
-    
+
     def _create_bar_chart(self) -> go.Figure:
         """棒グラフを作成"""
         fig = px.bar(
-            self.data,
-            x=self.x_column,
-            y=self.y_column,
-            title=self.title,
-            **self.kwargs
+            self.data, x=self.x_column, y=self.y_column, title=self.title, **self.kwargs
         )
         fig.update_layout(height=self.height)
         return fig
-    
+
     def _create_pie_chart(self) -> go.Figure:
         """円グラフを作成"""
         fig = px.pie(
@@ -119,23 +108,19 @@ class ChartComponent:
             values=self.y_column,
             names=self.x_column,
             title=self.title,
-            **self.kwargs
+            **self.kwargs,
         )
         fig.update_layout(height=self.height)
         return fig
-    
+
     def _create_scatter_chart(self) -> go.Figure:
         """散布図を作成"""
         fig = px.scatter(
-            self.data,
-            x=self.x_column,
-            y=self.y_column,
-            title=self.title,
-            **self.kwargs
+            self.data, x=self.x_column, y=self.y_column, title=self.title, **self.kwargs
         )
         fig.update_layout(height=self.height)
         return fig
-    
+
     def _create_heatmap(self) -> go.Figure:
         """ヒートマップを作成"""
         # ヒートマップ用のデータ整形
@@ -143,48 +128,44 @@ class ChartComponent:
             values=self.y_column,
             index=self.data.columns[0],
             columns=self.data.columns[1],
-            aggfunc='mean'
+            aggfunc="mean",
         )
-        
-        fig = px.imshow(
-            pivot_data,
-            title=self.title,
-            **self.kwargs
-        )
+
+        fig = px.imshow(pivot_data, title=self.title, **self.kwargs)
         fig.update_layout(height=self.height)
         return fig
-    
+
     def set_style(self, style: Dict[str, Any]) -> None:
         """
         カスタムスタイルを設定
-        
+
         Args:
             style: スタイル設定の辞書
         """
         self._custom_style = style
-    
+
     def on_click(self, handler: Callable) -> None:
         """
         クリックイベントハンドラーを追加
-        
+
         Args:
             handler: クリック時の処理関数
         """
         self._click_handlers.append(handler)
-    
+
     def update_data(self, new_data: pd.DataFrame) -> None:
         """
         データを更新
-        
+
         Args:
             new_data: 新しいデータフレーム
         """
         self.data = new_data
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """
         コンポーネントの設定を辞書として取得
-        
+
         Returns:
             設定辞書
         """
@@ -195,5 +176,5 @@ class ChartComponent:
             "y_column": self.y_column,
             "title": self.title,
             "height": self.height,
-            "kwargs": self.kwargs
-        } 
+            "kwargs": self.kwargs,
+        }
