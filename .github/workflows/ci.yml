@@ -43,13 +43,12 @@ jobs:
         flake8 db_ui_components/ --extend-ignore=E501
         # Temporarily format code in CI to fix version mismatch
         black db_ui_components/
-        # Skip mypy for now due to missing type stubs
-        # mypy db_ui_components/
+        # Run mypy with type checking
+        mypy db_ui_components/
     
     - name: Run tests
       run: |
-        # Temporarily run only a simple test to verify CI works
-        pytest tests/test_base_component.py -v || echo "Tests need fixing"
+        pytest tests/ -v --cov=db_ui_components --cov-report=xml --cov-report=term-missing
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
