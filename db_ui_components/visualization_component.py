@@ -564,9 +564,11 @@ class BubbleChartComponent(BaseComponent):
             バブルチャート用のデータ辞書
         """
         # サイズの正規化
-        sizes = data[self.size_column].values
-        sizes_min = float(sizes.min())  # type: ignore
-        sizes_max = float(sizes.max())  # type: ignore
+        import numpy as np
+
+        sizes = np.array(data[self.size_column].values)
+        sizes_min = float(np.min(sizes))
+        sizes_max = float(np.max(sizes))
         normalized_sizes = (sizes - sizes_min) / (sizes_max - sizes_min) * 50 + 10
 
         bubble_data: Dict[str, Any] = {
@@ -577,7 +579,7 @@ class BubbleChartComponent(BaseComponent):
             "marker": {
                 "size": normalized_sizes.tolist(),
                 "sizemode": "area",
-                "sizeref": 2 * float(normalized_sizes.max()) / (40**2),
+                "sizeref": 2 * float(np.max(normalized_sizes)) / (40**2),
                 "sizemin": 4,
             },
             "text": data[self.size_column].tolist(),

@@ -66,9 +66,11 @@ class ChartComponent:
         if hasattr(self, "_custom_style"):
             fig.update_layout(**self._custom_style)
 
-        return str(fig.to_html(
-            include_plotlyjs=True, full_html=False, config={"displayModeBar": True}
-        ))
+        return str(
+            fig.to_html(
+                include_plotlyjs=True, full_html=False, config={"displayModeBar": True}
+            )
+        )
 
     def _create_figure(self) -> go.Figure:
         """グラフを作成"""

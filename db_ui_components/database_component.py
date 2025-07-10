@@ -729,9 +729,13 @@ class SparkComponent(BaseComponent):
                                 "padding": "10px",
                                 "margin": "10px 0",
                                 "border-radius": "5px",
-                                "background-color": "#d4edda" if self.spark_session else "#f8d7da",
+                                "background-color": "#d4edda"
+                                if self.spark_session
+                                else "#f8d7da",
                                 "color": "#155724" if self.spark_session else "#721c24",
-                                "border": "1px solid #c3e6cb" if self.spark_session else "1px solid #f5c6cb",
+                                "border": "1px solid #c3e6cb"
+                                if self.spark_session
+                                else "1px solid #f5c6cb",
                             },
                         ),
                     ]
