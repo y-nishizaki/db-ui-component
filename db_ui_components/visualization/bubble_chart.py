@@ -73,7 +73,11 @@ class BubbleChartComponent(BaseVisualizationComponent):
                 "sizemin": 4,
             },
             "text": data[self.size_column].tolist(),
-            "hovertemplate": f"{self.x_column}: %{{x}}<br>{self.y_column}: %{{y}}<br>{self.size_column}: %{{text}}<extra></extra>",
+            "hovertemplate": (
+                f"{self.x_column}: %{{x}}<br>"
+                f"{self.y_column}: %{{y}}<br>"
+                f"{self.size_column}: %{{text}}<extra></extra>"
+            ),
         }
 
         # カラー分けがある場合

@@ -30,8 +30,9 @@ class DateFilterRenderer(FilterRenderer):
 
         html = f"""
         <div class="date-filter" style="margin: 10px 0;">
-            {f'<label style="display: block; margin-bottom: 5px; font-weight: bold;">'
-             f'{self.title or self.column}</label>' if self.title else ''}
+            {('<label style="display: block; margin-bottom: 5px; '
+              'font-weight: bold;">' + 
+              (self.title or self.column) + '</label>') if self.title else ''}
             <div style="display: flex; gap: 10px; align-items: center;">
                 <input type="date" id="{filter_id}-start"
                        placeholder="開始日"
@@ -61,7 +62,8 @@ class DateFilterRenderer(FilterRenderer):
             }};
 
             // イベントハンドラーを呼び出し
-            if (window.filterChangeHandlers && window.filterChangeHandlers['{self.column}']) {{
+            if (window.filterChangeHandlers &&
+                window.filterChangeHandlers['{self.column}']) {{
                 window.filterChangeHandlers['{self.column}'](window.currentFilters[column]);
             }}
         }}
@@ -91,7 +93,8 @@ class DropdownFilterRenderer(FilterRenderer):
             {f'<label style="display: block; margin-bottom: 5px; font-weight: bold;">{self.title or self.column}</label>' if self.title else ''}
             <select id="{filter_id}"
                     onchange="applyDropdownFilter('{filter_id}', '{self.column}')"
-                    style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 200px;">
+                    style="padding: 8px; border: 1px solid #ddd;
+                          border-radius: 4px; width: 200px;">
                 {options_html}
             </select>
         </div>
@@ -107,7 +110,8 @@ class DropdownFilterRenderer(FilterRenderer):
             }};
 
             // イベントハンドラーを呼び出し
-            if (window.filterChangeHandlers && window.filterChangeHandlers['{self.column}']) {{
+            if (window.filterChangeHandlers &&
+                window.filterChangeHandlers['{self.column}']) {{
                 window.filterChangeHandlers['{self.column}'](window.currentFilters[column]);
             }}
         }}
@@ -164,7 +168,8 @@ class MultiselectFilterRenderer(FilterRenderer):
             }};
 
             // イベントハンドラーを呼び出し
-            if (window.filterChangeHandlers && window.filterChangeHandlers['{self.column}']) {{
+            if (window.filterChangeHandlers &&
+                window.filterChangeHandlers['{self.column}']) {{
                 window.filterChangeHandlers['{self.column}'](window.currentFilters[column]);
             }}
         }}
@@ -197,7 +202,8 @@ class TextFilterRenderer(FilterRenderer):
             <input type="text" id="{filter_id}"
                    placeholder="{placeholder}"
                    oninput="applyTextFilter('{filter_id}', '{self.column}')"
-                   style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 200px;">
+                   style="padding: 8px; border: 1px solid #ddd;
+                          border-radius: 4px; width: 200px;">
         </div>
         <script>
         function applyTextFilter(filterId, column) {{
@@ -211,7 +217,8 @@ class TextFilterRenderer(FilterRenderer):
             }};
 
             // イベントハンドラーを呼び出し
-            if (window.filterChangeHandlers && window.filterChangeHandlers['{self.column}']) {{
+            if (window.filterChangeHandlers &&
+                window.filterChangeHandlers['{self.column}']) {{
                 window.filterChangeHandlers['{self.column}'](window.currentFilters[column]);
             }}
         }}
