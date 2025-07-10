@@ -136,4 +136,9 @@ dmypy.json
 
 # OS
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# CI/CD and Release
+.pypirc
+RELEASE_NOTES.md
+bandit-report.json 
