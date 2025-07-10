@@ -1,5 +1,10 @@
 # Databricks UI Components
 
+[![CI/CD Pipeline](https://github.com/y-nishizaki/db-ui-components/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/y-nishizaki/db-ui-components/actions)
+[![PyPI version](https://badge.fury.io/py/db-ui-components.svg)](https://badge.fury.io/py/db-ui-components)
+[![Python Versions](https://img.shields.io/pypi/pyversions/db-ui-components.svg)](https://pypi.org/project/db-ui-components/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 DatabricksノートブックやPython環境で美しいダッシュボードやインタラクティブな可視化を簡単に作成できるUIコンポーネントライブラリです。
 
 ## 特徴
@@ -42,5 +47,21 @@ displayHTML(chart.render())
 ## ライセンス
 MIT License
 
+## 開発状況
+
+### CI/CDパイプライン
+- ✅ GitHub Actionsによる自動テスト（Python 3.10, 3.11, 3.12）
+- ✅ コード品質チェック（flake8, black, mypy）
+- ✅ 自動デプロイ（TestPyPI, PyPI）
+- ✅ テストカバレッジレポート
+
+### テスト
+- 21個のテストファイル
+- 主要コンポーネントの単体テスト・統合テスト
+- パフォーマンステスト・エッジケーステスト
+
 ## サポート
-ご質問・不具合は[GitHub Issues](https://github.com/y-nishizaki/db-ui-components/issues)まで。 
+ご質問・不具合は[GitHub Issues](https://github.com/y-nishizaki/db-ui-components/issues)まで。
+
+## コントリビューション
+プルリクエスト歓迎です！[コントリビューションガイド](docs/development/contributing.md)をご覧ください。 

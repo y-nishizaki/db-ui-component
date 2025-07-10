@@ -103,10 +103,30 @@ python -m build
 - Releases are created from `main` via GitHub releases
 
 ### CI/CD Pipeline
+
+#### 現在の状態
 - **On PR/Push**: Tests run on Python 3.10, 3.11, 3.12
 - **develop branch**: Auto-deploys to TestPyPI
 - **GitHub Release**: Auto-deploys to production PyPI
 - All commits must pass: pytest, black, flake8, mypy
+
+#### 重要なCIコマンド
+```bash
+# ローカルでCIと同じ環境でテストを実行
+pip install -e .
+pytest tests/ -v --cov=db_ui_components --cov-report=term-missing
+
+# lintとフォーマットチェック
+flake8 db_ui_components/ --extend-ignore=E501
+black --check db_ui_components/
+mypy db_ui_components/
+```
+
+#### リリースプロセス
+1. developブランチで開発・テスト
+2. PRを作成してmainブランチへマージ
+3. GitHub Releaseを作成（タグ: v0.1.0形式）
+4. 自動的にPyPIへ公開される
 
 ## Databricks-Specific Considerations
 
