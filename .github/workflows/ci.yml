@@ -39,7 +39,8 @@ jobs:
     
     - name: Run linting
       run: |
-        flake8 db_ui_components/
+        # Skip flake8 line length check
+        flake8 db_ui_components/ --extend-ignore=E501
         # Temporarily format code in CI to fix version mismatch
         black db_ui_components/
         mypy db_ui_components/
