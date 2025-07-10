@@ -268,7 +268,7 @@ class ConfigStorage:
             "default_configs", {}
         ).items():
             config_class = config_converter.get_config_class(component_type)
-            if config_class:
+            if config_class and hasattr(config_class, 'from_dict'):
                 self._default_configs[component_type] = config_class.from_dict(
                     config_data
                 )
@@ -277,7 +277,7 @@ class ConfigStorage:
         for config_key, config_data in configs_dict.get("configs", {}).items():
             component_type = config_key.split("_")[0]
             config_class = config_converter.get_config_class(component_type)
-            if config_class:
+            if config_class and hasattr(config_class, 'from_dict'):
                 self._configs[config_key] = config_class.from_dict(config_data)
 
     def get_config(self, component_type: str, config_id: Optional[str] = None) -> Any:
@@ -431,13 +431,13 @@ class ConfigManager:
     def _validate_config(self, component_type: str, config: Any) -> bool:
         """設定を検証"""
         if component_type == "table":
-            return self.validator.validate_table_config(config)
+            return bool(self.validator.validate_table_config(config))
         elif component_type == "chart":
-            return self.validator.validate_chart_config(config)
+            return bool(self.validator.validate_chart_config(config))
         elif component_type == "filter":
-            return self.validator.validate_filter_config(config)
+            return bool(self.validator.validate_filter_config(config))
         else:
-            return self.validator.validate_component_config(config)
+            return bool(self.validator.validate_component_config(config))
 
 
 # グローバル設定マネージャー

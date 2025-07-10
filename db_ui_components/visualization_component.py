@@ -45,20 +45,25 @@ class SankeyChartComponent(BaseComponent):
         self.value_column = value_column
         self.title = title
         self.height = height
+        self._data: Optional[pd.DataFrame] = None
 
-    def render(self, data: pd.DataFrame) -> str:
+    def set_data(self, data: pd.DataFrame) -> None:
+        """データを設定"""
+        self._data = data
+
+    def render(self) -> str:
         """
         サンキーチャートをレンダリング
-
-        Args:
-            data: 可視化するデータフレーム
 
         Returns:
             レンダリングされたHTML
         """
+        if self._data is None:
+            return "<div>データが設定されていません</div>"
+
         try:
             # データの前処理
-            sankey_data = self._prepare_sankey_data(data)
+            sankey_data = self._prepare_sankey_data(self._data)
 
             # HTMLテンプレートの生成
             html = f"""
@@ -154,20 +159,25 @@ class HeatmapComponent(BaseComponent):
         self.title = title
         self.height = height
         self.color_scale = color_scale
+        self._data: Optional[pd.DataFrame] = None
 
-    def render(self, data: pd.DataFrame) -> str:
+    def set_data(self, data: pd.DataFrame) -> None:
+        """データを設定"""
+        self._data = data
+
+    def render(self) -> str:
         """
         ヒートマップをレンダリング
-
-        Args:
-            data: 可視化するデータフレーム
 
         Returns:
             レンダリングされたHTML
         """
+        if self._data is None:
+            return "<div>データが設定されていません</div>"
+
         try:
             # データの前処理
-            heatmap_data = self._prepare_heatmap_data(data)
+            heatmap_data = self._prepare_heatmap_data(self._data)
 
             # HTMLテンプレートの生成
             html = f"""
@@ -256,20 +266,25 @@ class NetworkGraphComponent(BaseComponent):
         self.weight_column = weight_column
         self.title = title
         self.height = height
+        self._data: Optional[pd.DataFrame] = None
 
-    def render(self, data: pd.DataFrame) -> str:
+    def set_data(self, data: pd.DataFrame) -> None:
+        """データを設定"""
+        self._data = data
+
+    def render(self) -> str:
         """
         ネットワークグラフをレンダリング
-
-        Args:
-            data: 可視化するデータフレーム
 
         Returns:
             レンダリングされたHTML
         """
+        if self._data is None:
+            return "<div>データが設定されていません</div>"
+
         try:
             # データの前処理
-            network_data = self._prepare_network_data(data)
+            network_data = self._prepare_network_data(self._data)
 
             # HTMLテンプレートの生成
             html = f"""
@@ -396,7 +411,7 @@ class TreemapComponent(BaseComponent):
         self.title = title
         self.height = height
 
-    def render(self, data: pd.DataFrame) -> str:
+    def render(self) -> str:
         """
         ツリーマップをレンダリング
 
@@ -487,7 +502,7 @@ class BubbleChartComponent(BaseComponent):
         self.title = title
         self.height = height
 
-    def render(self, data: pd.DataFrame) -> str:
+    def render(self) -> str:
         """
         バブルチャートをレンダリング
 
