@@ -415,7 +415,7 @@ class TreemapComponent(BaseComponent):
     def set_data(self, data: pd.DataFrame) -> None:
         """データを設定"""
         self._data = data
-        
+
     def render(self) -> str:
         """
         ツリーマップをレンダリング
@@ -425,7 +425,7 @@ class TreemapComponent(BaseComponent):
         """
         if self._data is None:
             return "<div>データが設定されていません</div>"
-            
+
         try:
             # データの前処理
             treemap_data = self._prepare_treemap_data(self._data)
@@ -511,7 +511,7 @@ class BubbleChartComponent(BaseComponent):
     def set_data(self, data: pd.DataFrame) -> None:
         """データを設定"""
         self._data = data
-        
+
     def render(self) -> str:
         """
         バブルチャートをレンダリング
@@ -521,7 +521,7 @@ class BubbleChartComponent(BaseComponent):
         """
         if self._data is None:
             return "<div>データが設定されていません</div>"
-            
+
         try:
             # データの前処理
             bubble_data = self._prepare_bubble_data(self._data)
