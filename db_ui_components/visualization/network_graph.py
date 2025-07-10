@@ -8,7 +8,7 @@
 
 import pandas as pd
 import math
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 from .base_visualization import BaseVisualizationComponent
 
 
