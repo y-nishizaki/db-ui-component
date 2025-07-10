@@ -1,255 +1,265 @@
 # インストールガイド
 
-このガイドでは、Databricks UI Component Libraryのインストール方法を詳しく説明します。
+このガイドでは、Databricks UI Component Libraryの詳細なインストール手順を説明します。
 
 ## 📋 前提条件
 
-### 必要な環境
+### システム要件
 
-- **Python**: 3.8以上
-- **pandas**: 1.5.0以上
-- **numpy**: 1.21.0以上
-- **plotly**: 5.0.0以上
+- Python 3.8以上
+- pip 20.0以上
+- Databricks Runtime 10.0以上（Databricks環境の場合）
 
-### 推奨環境
+### 必要な依存関係
 
-- **Databricks Runtime**: 10.4以上
-- **メモリ**: 4GB以上（大量データ処理時）
-- **ストレージ**: 1GB以上の空き容量
+- pandas >= 1.5.0
+- numpy >= 1.21.0
+- plotly >= 5.0.0
+- dash >= 2.0.0
+- dash-bootstrap-components >= 1.0.0
+- dash-table >= 5.0.0
+- flask >= 2.0.0
+- jinja2 >= 3.0.0
 
 ## 🚀 インストール方法
 
 ### 1. PyPIからのインストール（推奨）
 
 ```bash
+# 最新版のインストール
 pip install db-ui-components
+
+# 特定バージョンのインストール
+pip install db-ui-components==1.0.0
+
+# 開発版のインストール
+pip install db-ui-components --pre
 ```
 
-### 2. 開発版のインストール
+### 2. GitHubからのインストール
 
 ```bash
-# GitHubから直接インストール
-pip install git+https://github.com/your-username/db-ui-components.git
+# 最新版のインストール
+pip install git+https://github.com/databricks/db-ui-components.git
 
-# または、ローカルでビルドしてインストール
-git clone https://github.com/your-username/db-ui-components.git
-cd db-ui-components
-pip install -e .
+# 特定ブランチのインストール
+pip install git+https://github.com/databricks/db-ui-components.git@develop
+
+# 特定コミットのインストール
+pip install git+https://github.com/databricks/db-ui-components.git@commit_hash
 ```
 
-### 3. Databricksノートブックでのインストール
+### 3. ローカルからのインストール
+
+```bash
+# リポジトリのクローン
+git clone https://github.com/databricks/db-ui-components.git
+cd db-ui-components
+
+# 開発モードでのインストール
+pip install -e .
+
+# 通常のインストール
+pip install .
+```
+
+## 🏢 Databricks環境でのインストール
+
+### Databricksノートブックでのインストール
 
 ```python
 # ノートブック内で直接インストール
 !pip install db-ui-components
 
-# または、開発版をインストール
-!pip install git+https://github.com/your-username/db-ui-components.git
+# または、GitHubからインストール
+!pip install git+https://github.com/databricks/db-ui-components.git
 ```
 
-## 🔧 環境別インストール
+### Databricksクラスターでのインストール
 
-### Databricks環境
+#### 方法1: クラスターライブラリの追加
 
-#### Databricks Runtime 10.4以上
+1. Databricksワークスペースにログイン
+2. クラスター設定画面に移動
+3. 「Libraries」タブを選択
+4. 「Install New」をクリック
+5. 「PyPI」を選択
+6. パッケージ名に `db-ui-components` を入力
+7. 「Install」をクリック
 
-```python
-# ノートブックの最初のセルで実行
-!pip install db-ui-components
-
-# インストール確認
-import db_ui_components
-print(f"バージョン: {db_ui_components.__version__}")
-```
-
-#### Databricks Runtime 10.4未満
-
-```python
-# 依存関係を個別にインストール
-!pip install pandas>=1.5.0
-!pip install numpy>=1.21.0
-!pip install plotly>=5.0.0
-!pip install dash>=2.0.0
-!pip install db-ui-components
-```
-
-### ローカル環境
-
-#### 仮想環境の作成（推奨）
+#### 方法2: init scriptの使用
 
 ```bash
-# 仮想環境を作成
-python -m venv db-ui-env
-
-# 仮想環境をアクティベート
-# Windows
-db-ui-env\Scripts\activate
-
-# macOS/Linux
-source db-ui-env/bin/activate
-
-# インストール
+#!/bin/bash
 pip install db-ui-components
 ```
 
-#### グローバルインストール
+### Databricksジョブでのインストール
 
-```bash
-pip install db-ui-components
+```python
+# requirements.txtファイルに追加
+db-ui-components>=1.0.0
+
+# または、ジョブの設定で直接指定
 ```
 
-### Docker環境
+## 🔧 開発環境のセットアップ
 
-```dockerfile
-# Dockerfile
-FROM python:3.9-slim
-
-# 依存関係をインストール
-RUN pip install db-ui-components
-
-# アプリケーションコードをコピー
-COPY . /app
-WORKDIR /app
-
-# アプリケーションを実行
-CMD ["python", "app.py"]
-```
-
-## 📦 依存関係の詳細
-
-### 必須依存関係
-
-| パッケージ | バージョン | 用途 |
-|-----------|-----------|------|
-| pandas | >=1.5.0 | データ処理 |
-| numpy | >=1.21.0 | 数値計算 |
-| plotly | >=5.0.0 | グラフ描画 |
-| dash | >=2.0.0 | Webアプリケーションフレームワーク |
-| dash-bootstrap-components | >=1.0.0 | UIコンポーネント |
-| dash-table | >=5.0.0 | テーブルコンポーネント |
-| flask | >=2.0.0 | Webサーバー |
-| jinja2 | >=3.0.0 | テンプレートエンジン |
-
-### 開発用依存関係
+### 1. 開発用依存関係のインストール
 
 ```bash
-# 開発用パッケージをインストール
+# 開発用依存関係を含めてインストール
 pip install db-ui-components[dev]
+
+# または、個別にインストール
+pip install pytest pytest-cov black flake8 mypy pre-commit
 ```
 
-開発用パッケージには以下が含まれます：
-- pytest: テスト実行
-- black: コードフォーマット
-- flake8: リンター
-- mypy: 型チェック
+### 2. 仮想環境の作成
 
-## 🔍 インストール確認
+```bash
+# venvを使用
+python -m venv db-ui-components-env
+source db-ui-components-env/bin/activate  # Linux/Mac
+# または
+db-ui-components-env\Scripts\activate  # Windows
+
+# condaを使用
+conda create -n db-ui-components-env python=3.9
+conda activate db-ui-components-env
+```
+
+### 3. 開発用インストール
+
+```bash
+# リポジトリのクローン
+git clone https://github.com/databricks/db-ui-components.git
+cd db-ui-components
+
+# 開発用インストール
+pip install -e .
+
+# テストの実行
+pytest
+
+# コードフォーマット
+black .
+
+# リント
+flake8
+```
+
+## 🔍 インストールの確認
 
 ### 基本的な確認
 
 ```python
-# インポートテスト
-try:
-    from db_ui_components import ChartComponent, TableComponent, FilterComponent, Dashboard
-    print("✓ インポート成功")
-except ImportError as e:
-    print(f"✗ インポート失敗: {e}")
+# インポートの確認
+from db_ui_components import ChartComponent, TableComponent, Dashboard
 
-# バージョン確認
+# バージョンの確認
 import db_ui_components
-print(f"バージョン: {db_ui_components.__version__}")
+print(db_ui_components.__version__)
 ```
 
-### 機能テスト
+### 動作確認
 
 ```python
 import pandas as pd
 import numpy as np
 from db_ui_components import ChartComponent
 
-# サンプルデータ
+# サンプルデータの作成
 df = pd.DataFrame({
-    'date': pd.date_range('2024-01-01', periods=10, freq='D'),
-    'value': np.random.randn(10)
+    'x': range(10),
+    'y': np.random.randn(10)
 })
 
-# グラフコンポーネントのテスト
+# コンポーネントの作成
 chart = ChartComponent(
     data=df,
     chart_type='line',
-    x_column='date',
-    y_column='value',
+    x_column='x',
+    y_column='y',
     title='テストグラフ'
 )
 
-# HTML生成テスト
+# レンダリングの確認
 html_output = chart.render()
-print(f"✓ HTML生成成功（長さ: {len(html_output)}文字）")
+print("インストール成功！")
 ```
 
-## ⚠️ トラブルシューティング
+## 🛠️ トラブルシューティング
 
 ### よくある問題
 
-#### 1. ImportError: No module named 'db_ui_components'
+#### 1. 依存関係の競合
 
-**解決方法:**
 ```bash
-# インストール確認
-pip list | grep db-ui-components
+# 競合するパッケージの確認
+pip list | grep -E "(pandas|plotly|dash)"
 
-# 再インストール
-pip uninstall db-ui-components
-pip install db-ui-components
-```
-
-#### 2. 依存関係の競合
-
-**解決方法:**
-```bash
-# 仮想環境を使用
+# 仮想環境の使用を推奨
 python -m venv fresh-env
-source fresh-env/bin/activate  # macOS/Linux
+source fresh-env/bin/activate
 pip install db-ui-components
 ```
 
-#### 3. Databricksでの権限エラー
+#### 2. 権限エラー
 
-**解決方法:**
-```python
-# ユーザー権限でインストール
-!pip install --user db-ui-components
+```bash
+# ユーザー権限でのインストール
+pip install --user db-ui-components
+
+# または、sudoを使用（推奨されません）
+sudo pip install db-ui-components
 ```
 
-#### 4. メモリ不足
+#### 3. ネットワークエラー
 
-**解決方法:**
+```bash
+# プロキシ設定
+pip install --proxy http://proxy.company.com:8080 db-ui-components
+
+# または、ミラーサーバーの使用
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple db-ui-components
+```
+
+### Databricks固有の問題
+
+#### 1. クラスターの再起動が必要
+
+インストール後、クラスターを再起動してください。
+
+#### 2. ライブラリの競合
+
 ```python
-# クラスターの設定を確認
-# Databricksクラスター設定でメモリを増やす
-# または、データサイズを制限する
+# 既存のライブラリとの競合を確認
+import sys
+print(sys.path)
+
+# 必要に応じてパスの調整
+import db_ui_components
+```
+
+## 📦 アンインストール
+
+```bash
+# パッケージのアンインストール
+pip uninstall db-ui-components
+
+# 依存関係も含めてアンインストール
+pip uninstall -y db-ui-components pandas plotly dash
 ```
 
 ## 🔄 アップデート
 
-### 最新版へのアップデート
-
 ```bash
-# PyPIから最新版をインストール
+# 最新版へのアップデート
 pip install --upgrade db-ui-components
 
-# 開発版にアップデート
-pip install --upgrade git+https://github.com/your-username/db-ui-components.git
-```
-
-### 特定バージョンのインストール
-
-```bash
-# 特定バージョンをインストール
-pip install db-ui-components==1.0.0
-
-# バージョン範囲を指定
-pip install "db-ui-components>=1.0.0,<2.0.0"
+# 特定バージョンへのアップデート
+pip install --upgrade db-ui-components==1.1.0
 ```
 
 ## 📚 次のステップ
@@ -260,15 +270,10 @@ pip install "db-ui-components>=1.0.0,<2.0.0"
 - [基本使用法](../tutorials/basic_usage.md) - 基本的な使用方法
 - [Databricksでの使用](./databricks_usage.md) - Databricks環境での使用方法
 
-## 🤝 サポート
+## ❓ サポート
 
 インストールで問題が発生した場合は、以下を確認してください：
 
-1. **Pythonバージョン**: `python --version`
-2. **pipバージョン**: `pip --version`
-3. **エラーメッセージ**: 完全なエラーメッセージをコピー
-4. **環境情報**: OS、Python環境、Databricksバージョン
-
-**関連リンク:**
-- [よくある問題](../troubleshooting/faq.md) - インストール関連のFAQ
-- [エラーリファレンス](../troubleshooting/errors.md) - エラーメッセージの説明
+- [よくある問題](../troubleshooting/faq.md)
+- [エラーリファレンス](../troubleshooting/errors.md)
+- [GitHub Issues](https://github.com/databricks/db-ui-components/issues)

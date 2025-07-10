@@ -14,10 +14,10 @@ pip install db-ui-components
 
 ```bash
 # GitHubから直接インストール
-pip install git+https://github.com/your-username/db-ui-components.git
+pip install git+https://github.com/databricks/db-ui-components.git
 
 # または、ローカルでビルドしてインストール
-git clone https://github.com/your-username/db-ui-components.git
+git clone https://github.com/databricks/db-ui-components.git
 cd db-ui-components
 pip install -e .
 ```
@@ -29,7 +29,7 @@ pip install -e .
 !pip install db-ui-components
 
 # または、開発版をインストール
-!pip install git+https://github.com/your-username/db-ui-components.git
+!pip install git+https://github.com/databricks/db-ui-components.git
 ```
 
 **特徴:**
