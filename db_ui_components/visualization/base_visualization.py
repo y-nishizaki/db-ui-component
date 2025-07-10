@@ -38,7 +38,7 @@ class BaseVisualizationComponent(BaseComponent):
     def set_data(self, data: pd.DataFrame) -> None:
         """データを設定"""
         self._data = data
-        
+
     def render(self) -> str:
         """
         可視化コンポーネントをレンダリング
@@ -48,7 +48,7 @@ class BaseVisualizationComponent(BaseComponent):
         """
         if self._data is None:
             return "<div>データが設定されていません</div>"
-            
+
         try:
             # データの前処理（サブクラスで実装）
             chart_data = self._prepare_chart_data(self._data)

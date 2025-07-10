@@ -7,7 +7,7 @@
 
 import json
 import pandas as pd
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from .base_component import BaseComponent
 from .exceptions import ComponentError
 
