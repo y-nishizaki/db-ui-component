@@ -9,10 +9,10 @@ description = "Databricksダッシュボード用UIコンポーネントライ�
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "Databricks Team", email = "team@databricks.com"}
 ]
 maintainers = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "Databricks Team", email = "team@databricks.com"}
 ]
 keywords = ["databricks", "dashboard", "ui", "components", "plotly", "dash"]
 classifiers = [
@@ -52,10 +52,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/your-username/db-ui-components"
-Repository = "https://github.com/your-username/db-ui-components"
-Documentation = "https://github.com/your-username/db-ui-components#readme"
-Issues = "https://github.com/your-username/db-ui-components/issues"
+Homepage = "https://github.com/databricks/db-ui-components"
+Repository = "https://github.com/databricks/db-ui-components"
+Documentation = "https://github.com/databricks/db-ui-components#readme"
+Issues = "https://github.com/databricks/db-ui-components/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]

@@ -2,48 +2,39 @@
 
 このガイドでは、Databricks環境でDatabricks UI Component Libraryを使用する方法を詳しく説明します。
 
-## 🚀 Databricks環境でのセットアップ
+## 🎯 概要
 
-### 1. インストール
+Databricks UI Component Libraryは、Databricksの`displayHTML`関数と完全に互換性があり、ノートブック内で美しいダッシュボードを作成できます。
 
-#### Databricks Runtime 10.4以上
+## 🚀 基本的な使用方法
 
-```python
-# ノートブックの最初のセルで実行
-!pip install db-ui-components
-
-# インストール確認
-import db_ui_components
-print(f"バージョン: {db_ui_components.__version__}")
-```
-
-#### Databricks Runtime 10.4未満
-
-```python
-# 依存関係を個別にインストール
-!pip install pandas>=1.5.0
-!pip install numpy>=1.21.0
-!pip install plotly>=5.0.0
-!pip install dash>=2.0.0
-!pip install db-ui-components
-```
-
-### 2. 基本的な使用例
+### 1. ライブラリのインポート
 
 ```python
 # 必要なライブラリをインポート
+from db_ui_components import ChartComponent, TableComponent, Dashboard
 import pandas as pd
 import numpy as np
-from db_ui_components import ChartComponent, TableComponent, Dashboard
+```
 
+### 2. サンプルデータの作成
+
+```python
 # サンプルデータの作成
 np.random.seed(42)
-df = pd.DataFrame({
-    'date': pd.date_range('2024-01-01', periods=30, freq='D'),
+dates = pd.date_range('2024-01-01', periods=30, freq='D')
+data = {
+    'date': dates,
     'sales': np.random.normal(1000, 200, 30),
-    'profit': np.random.normal(200, 50, 30)
-})
+    'profit': np.random.normal(200, 50, 30),
+    'category': np.random.choice(['A', 'B', 'C'], 30)
+}
+df = pd.DataFrame(data)
+```
 
+### 3. コンポーネントの作成と表示
+
+```python
 # グラフコンポーネントの作成
 chart = ChartComponent(
     data=df,
@@ -57,464 +48,397 @@ chart = ChartComponent(
 displayHTML(chart.render())
 ```
 
-## 📊 Databricksでのデータ処理
+## 📊 実践的な例
 
-### 1. Delta Lakeからのデータ読み込み
+### 売上ダッシュボード
 
 ```python
-# Deltaテーブルからデータを読み込み
-df = spark.read.format("delta").load("/path/to/your/table").toPandas()
+import pandas as pd
+import numpy as np
+from db_ui_components import ChartComponent, TableComponent, Dashboard
 
-# データの前処理
-df['date'] = pd.to_datetime(df['date'])
-df = df.sort_values('date')
+# データの準備
+np.random.seed(42)
+dates = pd.date_range('2024-01-01', periods=100, freq='D')
+data = {
+    'date': dates,
+    'sales': np.random.normal(1000, 200, 100),
+    'profit': np.random.normal(200, 50, 100),
+    'category': np.random.choice(['Electronics', 'Clothing', 'Books'], 100),
+    'region': np.random.choice(['North', 'South', 'East', 'West'], 100)
+}
+df = pd.DataFrame(data)
 
-# グラフコンポーネントで表示
-chart = ChartComponent(
+# コンポーネントの作成
+sales_chart = ChartComponent(
     data=df,
     chart_type='line',
     x_column='date',
     y_column='sales',
-    title='Delta Lakeからの売上データ'
-)
-
-displayHTML(chart.render())
-```
-
-### 2. Spark DataFrameの変換
-
-```python
-# Spark DataFrameをPandas DataFrameに変換
-spark_df = spark.sql("SELECT * FROM sales_table WHERE date >= '2024-01-01'")
-df = spark_df.toPandas()
-
-# データの集約
-daily_sales = df.groupby('date')['sales'].sum().reset_index()
-
-# グラフで表示
-chart = ChartComponent(
-    data=daily_sales,
-    chart_type='bar',
-    x_column='date',
-    y_column='sales',
-    title='日次売上集計'
-)
-
-displayHTML(chart.render())
-```
-
-### 3. 大量データの処理
-
-```python
-# 大量データのサンプリング
-large_df = spark.read.format("delta").load("/path/to/large/table")
-
-# サンプリングしてからPandasに変換
-sampled_df = large_df.sample(fraction=0.1, seed=42).toPandas()
-
-# または、特定の期間のデータのみを取得
-recent_df = large_df.filter("date >= '2024-01-01'").toPandas()
-
-# グラフで表示
-chart = ChartComponent(
-    data=sampled_df,
-    chart_type='line',
-    x_column='date',
-    y_column='sales',
-    title='大量データのサンプリング結果'
-)
-
-displayHTML(chart.render())
-```
-
-## 🎛️ Databricksでのダッシュボード作成
-
-### 1. 基本的なダッシュボード
-
-```python
-from db_ui_components import Dashboard, ChartComponent, TableComponent
-
-# データの準備
-sales_data = spark.sql("""
-    SELECT 
-        date,
-        SUM(sales) as total_sales,
-        SUM(profit) as total_profit,
-        COUNT(*) as transaction_count
-    FROM sales_table 
-    WHERE date >= '2024-01-01'
-    GROUP BY date
-    ORDER BY date
-""").toPandas()
-
-# ダッシュボードの作成
-dashboard = Dashboard(title='Databricks売上ダッシュボード')
-
-# 売上推移グラフ
-sales_chart = ChartComponent(
-    data=sales_data,
-    chart_type='line',
-    x_column='date',
-    y_column='total_sales',
     title='売上推移'
 )
-dashboard.add_component(sales_chart, position=(0, 0))
 
-# 利益推移グラフ
 profit_chart = ChartComponent(
-    data=sales_data,
+    data=df,
     chart_type='line',
     x_column='date',
-    y_column='total_profit',
+    y_column='profit',
     title='利益推移'
 )
-dashboard.add_component(profit_chart, position=(0, 1))
 
-# 詳細テーブル
-detail_table = TableComponent(
-    data=sales_data,
+category_sales = df.groupby('category')['sales'].sum().reset_index()
+category_chart = ChartComponent(
+    data=category_sales,
+    chart_type='pie',
+    x_column='category',
+    y_column='sales',
+    title='カテゴリ別売上'
+)
+
+data_table = TableComponent(
+    data=df.head(20),
     enable_csv_download=True,
     sortable=True,
-    searchable=True,
-    title='売上詳細'
+    searchable=True
 )
-dashboard.add_component(detail_table, position=(1, 0))
+
+# ダッシュボードの作成
+dashboard = Dashboard(title='売上ダッシュボード')
+dashboard.add_component(sales_chart, position=(0, 0))
+dashboard.add_component(profit_chart, position=(0, 1))
+dashboard.add_component(category_chart, position=(1, 0))
+dashboard.add_component(data_table, position=(1, 1))
 
 # 表示
 displayHTML(dashboard.render())
 ```
 
-### 2. リアルタイムデータ更新
+## 🔄 インタラクティブなダッシュボード
 
-```python
-# 定期的なデータ更新
-import time
-from datetime import datetime
-
-def update_dashboard():
-    """ダッシュボードを定期的に更新"""
-    while True:
-        # 最新データを取得
-        latest_data = spark.sql("""
-            SELECT 
-                date,
-                SUM(sales) as total_sales
-            FROM sales_table 
-            WHERE date >= DATE_SUB(CURRENT_DATE(), 30)
-            GROUP BY date
-            ORDER BY date
-        """).toPandas()
-        
-        # グラフを更新
-        chart = ChartComponent(
-            data=latest_data,
-            chart_type='line',
-            x_column='date',
-            y_column='total_sales',
-            title=f'リアルタイム売上推移 (更新: {datetime.now().strftime("%H:%M:%S")})'
-        )
-        
-        # 表示
-        displayHTML(chart.render())
-        
-        # 5分待機
-        time.sleep(300)
-
-# バックグラウンドで実行（注意: 実際の使用では適切なスケジューリングを使用）
-# update_dashboard()
-```
-
-## 🔍 Databricksでのフィルター機能
-
-### 1. 動的フィルター
+### フィルター機能
 
 ```python
 from db_ui_components import FilterComponent
 
-# 利用可能なカテゴリを取得
-categories = spark.sql("SELECT DISTINCT category FROM sales_table").toPandas()['category'].tolist()
-
-# カテゴリフィルター
-category_filter = FilterComponent(
-    filter_type='dropdown',
-    column='category',
-    options=categories,
-    placeholder='カテゴリを選択',
-    title='カテゴリフィルター'
-)
-
-displayHTML(category_filter.render())
-
-# フィルター結果を表示
-def show_filtered_data(selected_category):
-    """選択されたカテゴリのデータを表示"""
-    filtered_data = spark.sql(f"""
-        SELECT * FROM sales_table 
-        WHERE category = '{selected_category}'
-        ORDER BY date
-    """).toPandas()
-    
-    chart = ChartComponent(
-        data=filtered_data,
-        chart_type='line',
-        x_column='date',
-        y_column='sales',
-        title=f'{selected_category}カテゴリの売上'
-    )
-    
-    displayHTML(chart.render())
-```
-
-### 2. 日付範囲フィルター
-
-```python
-# 日付範囲の取得
-date_range = spark.sql("""
-    SELECT 
-        MIN(date) as min_date,
-        MAX(date) as max_date
-    FROM sales_table
-""").toPandas()
-
-# 日付範囲フィルター
+# フィルターコンポーネントの作成
 date_filter = FilterComponent(
     filter_type='date',
     column='date',
-    start_date=date_range['min_date'].iloc[0],
-    end_date=date_range['max_date'].iloc[0],
-    title='日付範囲フィルター'
+    title='日付範囲'
 )
 
-displayHTML(date_filter.render())
+category_filter = FilterComponent(
+    filter_type='dropdown',
+    column='category',
+    options=['Electronics', 'Clothing', 'Books'],
+    title='カテゴリ'
+)
+
+region_filter = FilterComponent(
+    filter_type='multiselect',
+    column='region',
+    options=['North', 'South', 'East', 'West'],
+    title='地域'
+)
+
+# フィルターされたデータでグラフを更新する関数
+def update_charts(filtered_data):
+    sales_chart.update_data(filtered_data)
+    profit_chart.update_data(filtered_data)
+    data_table.update_data(filtered_data.head(20))
+
+# フィルターイベントの設定
+date_filter.on_change(update_charts)
+category_filter.on_change(update_charts)
+region_filter.on_change(update_charts)
+
+# ダッシュボードにフィルターを追加
+dashboard.add_component(date_filter, position=(0, 0))
+dashboard.add_component(category_filter, position=(0, 1))
+dashboard.add_component(region_filter, position=(0, 2))
+
+displayHTML(dashboard.render())
+```
+
+## 🗄️ データベースとの連携
+
+### Databricks SQLとの連携
+
+```python
+from db_ui_components import DatabaseComponent
+
+# データベースコンポーネントの作成
+db_component = DatabaseComponent(
+    connection_string="your_databricks_sql_connection",
+    query="SELECT * FROM sales_data WHERE date >= '2024-01-01'"
+)
+
+# データの取得
+sales_data = db_component.execute_query()
+
+# グラフの作成
+chart = ChartComponent(
+    data=sales_data,
+    chart_type='line',
+    x_column='date',
+    y_column='sales',
+    title='データベースからの売上データ'
+)
+
+displayHTML(chart.render())
+```
+
+### Spark DataFrameとの連携
+
+```python
+# Spark DataFrameからPandas DataFrameへの変換
+spark_df = spark.sql("SELECT * FROM sales_data")
+pandas_df = spark_df.toPandas()
+
+# グラフの作成
+chart = ChartComponent(
+    data=pandas_df,
+    chart_type='bar',
+    x_column='category',
+    y_column='sales',
+    title='Sparkデータからの売上'
+)
+
+displayHTML(chart.render())
+```
+
+## 🎨 カスタマイズとスタイリング
+
+### テーマの適用
+
+```python
+# ダークテーマの適用
+dashboard.set_theme('dark')
+
+# カスタムスタイルの設定
+dashboard.set_style({
+    'backgroundColor': '#1e1e1e',
+    'color': '#ffffff',
+    'fontFamily': 'Arial, sans-serif',
+    'borderRadius': '8px',
+    'padding': '16px'
+})
+
+displayHTML(dashboard.render())
+```
+
+### レスポンシブデザイン
+
+```python
+# レスポンシブ対応のダッシュボード
+dashboard = Dashboard(
+    title='レスポンシブダッシュボード',
+    layout='responsive',
+    responsive_breakpoints={
+        'mobile': 768,
+        'tablet': 1024,
+        'desktop': 1200
+    }
+)
 ```
 
 ## 📈 パフォーマンス最適化
 
-### 1. データキャッシュ
+### 大量データの処理
 
 ```python
-# 頻繁に使用するデータをキャッシュ
-frequently_used_data = spark.sql("""
-    SELECT 
-        date,
-        category,
-        region,
-        SUM(sales) as total_sales,
-        SUM(profit) as total_profit
-    FROM sales_table 
-    WHERE date >= '2024-01-01'
-    GROUP BY date, category, region
-""").cache()
+# データのサンプリング
+large_df = spark.sql("SELECT * FROM large_table").toPandas()
+sampled_df = large_df.sample(n=10000, random_state=42)
 
-# Pandas DataFrameに変換
-df = frequently_used_data.toPandas()
+# 集約データの使用
+aggregated_df = large_df.groupby(['category', 'region']).agg({
+    'sales': 'sum',
+    'profit': 'sum'
+}).reset_index()
 
-# グラフで表示
+# グラフの作成
 chart = ChartComponent(
-    data=df,
-    chart_type='line',
-    x_column='date',
-    y_column='total_sales',
-    title='キャッシュされた売上データ'
-)
-
-displayHTML(chart.render())
-```
-
-### 2. データサンプリング
-
-```python
-# 大量データのサンプリング
-def get_sampled_data(table_path, sample_fraction=0.1):
-    """大量データからサンプリング"""
-    df = spark.read.format("delta").load(table_path)
-    sampled_df = df.sample(fraction=sample_fraction, seed=42)
-    return sampled_df.toPandas()
-
-# サンプリングしたデータでグラフ作成
-sampled_data = get_sampled_data("/path/to/large/table", 0.05)
-
-chart = ChartComponent(
-    data=sampled_data,
-    chart_type='scatter',
-    x_column='sales',
-    y_column='profit',
-    title='サンプリングされた売上・利益データ'
-)
-
-displayHTML(chart.render())
-```
-
-## 🔧 トラブルシューティング
-
-### 1. メモリ不足の対処
-
-```python
-# データサイズを制限
-def limit_data_size(df, max_rows=10000):
-    """データサイズを制限"""
-    if len(df) > max_rows:
-        return df.sample(n=max_rows, random_state=42)
-    return df
-
-# 制限されたデータでグラフ作成
-limited_data = limit_data_size(df, 5000)
-
-chart = ChartComponent(
-    data=limited_data,
-    chart_type='line',
-    x_column='date',
+    data=aggregated_df,
+    chart_type='bar',
+    x_column='category',
     y_column='sales',
-    title='制限された売上データ'
+    title='集約された売上データ'
 )
-
-displayHTML(chart.render())
 ```
 
-### 2. データ型の問題
+### キャッシュの活用
 
 ```python
-# データ型の確認と修正
-def fix_data_types(df):
-    """データ型を修正"""
-    # 日付列の修正
-    if 'date' in df.columns:
-        df['date'] = pd.to_datetime(df['date'])
-    
-    # 数値列の修正
-    numeric_columns = ['sales', 'profit']
-    for col in numeric_columns:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors='coerce')
-    
-    return df
+# データのキャッシュ
+@cache
+def get_sales_data():
+    return spark.sql("SELECT * FROM sales_data").toPandas()
 
-# データ型を修正してからグラフ作成
-fixed_data = fix_data_types(df)
-
-chart = ChartComponent(
-    data=fixed_data,
-    chart_type='line',
-    x_column='date',
-    y_column='sales',
-    title='データ型修正済み売上データ'
-)
-
-displayHTML(chart.render())
+# キャッシュされたデータを使用
+sales_data = get_sales_data()
+chart = ChartComponent(data=sales_data, chart_type='line', x_column='date', y_column='sales')
 ```
 
-## 🎯 実践的な例
+## 🔧 高度な機能
 
-### 完全なDatabricks分析ダッシュボード
+### リアルタイム更新
 
 ```python
-# 包括的な分析ダッシュボード
-def create_comprehensive_dashboard():
-    """包括的な分析ダッシュボードを作成"""
+import time
+from IPython.display import clear_output
+
+# リアルタイム更新の例
+for i in range(10):
+    # 新しいデータの生成
+    new_data = pd.DataFrame({
+        'timestamp': pd.date_range('2024-01-01', periods=30, freq='D'),
+        'value': np.random.normal(100, 20, 30)
+    })
     
-    # 1. 売上サマリー
-    sales_summary = spark.sql("""
-        SELECT 
-            DATE_TRUNC('month', date) as month,
-            SUM(sales) as total_sales,
-            SUM(profit) as total_profit,
-            COUNT(*) as transaction_count
-        FROM sales_table 
-        WHERE date >= '2024-01-01'
-        GROUP BY DATE_TRUNC('month', date)
-        ORDER BY month
-    """).toPandas()
+    # グラフの更新
+    chart.update_data(new_data)
     
-    # 2. カテゴリ別分析
-    category_analysis = spark.sql("""
-        SELECT 
-            category,
-            SUM(sales) as total_sales,
-            AVG(sales) as avg_sales,
-            COUNT(*) as transaction_count
-        FROM sales_table 
-        WHERE date >= '2024-01-01'
-        GROUP BY category
-        ORDER BY total_sales DESC
-    """).toPandas()
+    # 表示の更新
+    clear_output(wait=True)
+    displayHTML(chart.render())
     
-    # 3. 地域別分析
-    region_analysis = spark.sql("""
-        SELECT 
-            region,
-            SUM(sales) as total_sales,
-            SUM(profit) as total_profit
-        FROM sales_table 
-        WHERE date >= '2024-01-01'
-        GROUP BY region
-        ORDER BY total_sales DESC
-    """).toPandas()
-    
-    # ダッシュボードの作成
-    dashboard = Dashboard(title='Databricks包括的分析ダッシュボード')
-    
-    # 月次売上推移
-    monthly_chart = ChartComponent(
-        data=sales_summary,
-        chart_type='line',
-        x_column='month',
-        y_column='total_sales',
-        title='月次売上推移'
-    )
-    dashboard.add_component(monthly_chart, position=(0, 0))
-    
-    # カテゴリ別売上
-    category_chart = ChartComponent(
-        data=category_analysis,
-        chart_type='bar',
-        x_column='category',
-        y_column='total_sales',
-        title='カテゴリ別売上'
-    )
-    dashboard.add_component(category_chart, position=(0, 1))
-    
-    # 地域別売上
-    region_chart = ChartComponent(
-        data=region_analysis,
+    time.sleep(2)  # 2秒待機
+```
+
+### 条件付き表示
+
+```python
+# 条件に基づいてコンポーネントを表示
+if len(df) > 100:
+    # 大量データの場合は集約グラフ
+    aggregated_df = df.groupby('category')['sales'].sum().reset_index()
+    chart = ChartComponent(
+        data=aggregated_df,
         chart_type='pie',
-        x_column='region',
-        y_column='total_sales',
-        title='地域別売上構成'
+        x_column='category',
+        y_column='sales',
+        title='カテゴリ別売上（集約）'
     )
-    dashboard.add_component(region_chart, position=(1, 0))
-    
-    # 詳細テーブル
-    detail_table = TableComponent(
-        data=sales_summary,
-        enable_csv_download=True,
-        sortable=True,
-        searchable=True,
-        title='月次売上詳細'
+else:
+    # 少量データの場合は詳細グラフ
+    chart = ChartComponent(
+        data=df,
+        chart_type='line',
+        x_column='date',
+        y_column='sales',
+        title='売上推移（詳細）'
     )
-    dashboard.add_component(detail_table, position=(1, 1))
-    
-    return dashboard
 
-# ダッシュボードの作成と表示
-dashboard = create_comprehensive_dashboard()
-displayHTML(dashboard.render())
+displayHTML(chart.render())
 ```
 
-## 📚 次のステップ
+## 🛠️ トラブルシューティング
 
-- [パフォーマンス最適化](./performance.md) - Databricksでのパフォーマンス改善
+### よくある問題と解決方法
+
+#### 1. メモリ不足エラー
+
+```python
+# データサイズの制限
+df_limited = df.head(1000)  # 最初の1000行のみ使用
+
+# または、データの集約
+df_aggregated = df.groupby('category').agg({
+    'sales': 'sum',
+    'profit': 'sum'
+}).reset_index()
+```
+
+#### 2. 表示エラー
+
+```python
+# HTMLの確認
+html_output = chart.render()
+print(f"HTML長さ: {len(html_output)}")
+
+# エラーハンドリング
+try:
+    displayHTML(chart.render())
+except Exception as e:
+    print(f"表示エラー: {e}")
+    # フォールバック表示
+    display(df.head())
+```
+
+#### 3. パフォーマンス問題
+
+```python
+# プロファイリング
+import time
+
+start_time = time.time()
+chart = ChartComponent(data=df, chart_type='line', x_column='date', y_column='sales')
+render_time = time.time() - start_time
+print(f"レンダリング時間: {render_time:.2f}秒")
+```
+
+## 📚 ベストプラクティス
+
+### 1. データの前処理
+
+```python
+# データのクリーニング
+df_clean = df.dropna()  # 欠損値の削除
+df_clean = df_clean[df_clean['sales'] > 0]  # 異常値の除去
+
+# データ型の最適化
+df_clean['date'] = pd.to_datetime(df_clean['date'])
+df_clean['category'] = df_clean['category'].astype('category')
+```
+
+### 2. エラーハンドリング
+
+```python
+def safe_render(component, fallback_html=""):
+    """安全なレンダリング関数"""
+    try:
+        return component.render()
+    except Exception as e:
+        print(f"レンダリングエラー: {e}")
+        return fallback_html
+
+# 使用例
+html_output = safe_render(chart, "<p>グラフの表示に失敗しました</p>")
+displayHTML(html_output)
+```
+
+### 3. ログ出力
+
+```python
+import logging
+
+# ログの設定
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# ログ付きのコンポーネント作成
+def create_chart_with_logging(data, **kwargs):
+    logger.info(f"グラフの作成開始: {kwargs}")
+    try:
+        chart = ChartComponent(data=data, **kwargs)
+        logger.info("グラフの作成完了")
+        return chart
+    except Exception as e:
+        logger.error(f"グラフの作成失敗: {e}")
+        raise
+```
+
+## � 次のステップ
+
+- [パフォーマンス最適化](./performance.md) - パフォーマンスの最適化
 - [セキュリティ](./security.md) - セキュリティのベストプラクティス
-- [トラブルシューティング](../troubleshooting/faq.md) - よくある問題と解決方法
+- [デプロイメント](./deployment.md) - 本番環境へのデプロイ
 
 ## ❓ サポート
 
-Databricksでの使用で問題が発生した場合は：
+問題が発生した場合は、以下を確認してください：
 
-1. **クラスター設定**の確認
-2. **メモリ使用量**の監視
-3. **データサイズ**の確認
-4. **エラーログ**の確認
-
-**関連リンク:**
-- [インストールガイド](./installation.md) - 詳細なインストール手順
-- [よくある問題](../troubleshooting/faq.md) - Databricks関連のFAQ
+- [よくある問題](../troubleshooting/faq.md)
+- [エラーリファレンス](../troubleshooting/errors.md)
+- [GitHub Issues](https://github.com/databricks/db-ui-components/issues)

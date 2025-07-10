@@ -30,10 +30,10 @@ from .visualization import (
 )
 
 __version__ = "1.0.0"
-__author__ = "Your Name"
-__email__ = "your.email@example.com"
+__author__ = "Databricks Team"
+__email__ = "team@databricks.com"
 __description__ = "Databricksダッシュボード用UIコンポーネントライブラリ"
-__url__ = "https://github.com/your-username/db-ui-components"
+__url__ = "https://github.com/databricks/db-ui-components"
 
 __all__ = [
     "ChartComponent",
