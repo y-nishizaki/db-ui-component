@@ -31,6 +31,13 @@
 - **release/xxx → main, develop**: プルリクエスト（テスト・レビュー必須）
 - **hotfix/xxx → main, develop**: プルリクエスト（緊急時はmain優先、後でdevelopへもマージ）
 
+### mainブランチの保護設定
+mainブランチは本番リリース用の安定ブランチのため、以下の保護設定が適用されています：
+- 直接push禁止（必ずPull Request経由でマージ）
+- レビュー必須（最低1名以上の承認）
+- CI（テスト・Lint）が全て成功しないとマージ不可
+- 強制プッシュ（force push）禁止
+
 ### ブランチ削除
 - マージ後は不要な一時ブランチ（feature, fix, hotfix, release）は削除
 
@@ -98,6 +105,8 @@ A. mainは本番用、developは開発統合用です。
 
 ### Q. どのブランチでリリースされる？
 A. mainブランチでGitHub Releaseを作成したときのみPyPIに本番リリースされます。
+
+
 
 ---
 
