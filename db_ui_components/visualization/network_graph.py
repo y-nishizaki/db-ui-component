@@ -6,6 +6,7 @@
 - ネットワークグラフ固有の設定管理
 """
 
+import json
 import pandas as pd
 import math
 from typing import Dict, Any, Optional
