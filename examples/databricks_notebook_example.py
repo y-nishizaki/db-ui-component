@@ -1,287 +1,180 @@
 """
-Databricks Notebook Example
+Databricksノートブックでの使用例
 
-Databricksノートブック内でのデータベースアクセス機能の使用例です。
+このファイルはDatabricksノートブック内で実行することを想定しています。
 """
 
-# Databricksノートブック内で実行する例
+# Databricks環境でのインポート
+from db_ui_components.databricks_database import (
+    DatabricksDatabaseComponent,
+    create_databricks_database_component,
+    execute_sql,
+    get_tables,
+    preview_table,
+    get_table_stats
+)
 
-def databricks_notebook_example():
-    """
-    Databricksノートブック内での使用例
-    """
-    print("=== Databricks Database Access Example ===")
-    
-    # 1. 基本的なSQLクエリ実行
-    print("\n1. 基本的なSQLクエリ実行")
-    try:
-        from db_ui_components.databricks_database import execute_sql
-        
-        # 簡単なクエリを実行
-        result = execute_sql("SELECT current_timestamp() as current_time, version() as spark_version")
-        print("クエリ結果:")
-        print(result)
-        
-    except Exception as e:
-        print(f"エラー: {e}")
-    
-    # 2. テーブル一覧の取得
-    print("\n2. テーブル一覧の取得")
-    try:
-        from db_ui_components.databricks_database import get_tables
-        
-        # デフォルトスキーマのテーブル一覧を取得
-        tables = get_tables()
-        print(f"テーブル数: {len(tables)}")
-        if len(tables) > 0:
-            print("テーブル一覧:")
-            for _, row in tables.iterrows():
-                print(f"  - {row['table_name']} ({row['table_type']})")
-        
-    except Exception as e:
-        print(f"エラー: {e}")
-    
-    # 3. テーブルプレビュー
-    print("\n3. テーブルプレビュー")
-    try:
-        from db_ui_components.databricks_database import preview_table
-        
-        # 最初のテーブルをプレビュー
-        if len(tables) > 0:
-            first_table = tables.iloc[0]['table_name']
-            preview = preview_table(first_table, limit=5)
-            print(f"テーブル '{first_table}' のプレビュー:")
-            print(preview.head())
-        
-    except Exception as e:
-        print(f"エラー: {e}")
-    
-    # 4. コンポーネントを使用したインタラクティブな操作
-    print("\n4. インタラクティブなコンポーネント")
-    try:
-        from db_ui_components.databricks_database import DatabricksDatabaseComponent
-        
-        # データベースコンポーネントを作成
-        db_component = DatabricksDatabaseComponent(
-            component_id="notebook-db",
-            catalog="hive_metastore",
-            schema="default"
-        )
-        
-        # ノートブックで表示
-        display(db_component.display())
-        
-    except Exception as e:
-        print(f"エラー: {e}")
+# 1. 基本的な使用例
+print("=== Databricks Database Component Example ===")
 
+# コンポーネントの作成
+db = create_databricks_database_component("my-db", catalog="hive_metastore", schema="default")
 
-def databricks_sql_magic_example():
-    """
-    Databricks SQLマジックコマンドの使用例
-    """
-    print("=== Databricks SQL Magic Example ===")
+# 2. SQLクエリの実行
+print("\n--- SQL Query Execution ---")
+try:
+    # 現在時刻を取得
+    result = execute_sql("SELECT current_timestamp() as current_time")
+    print("Current time query result:")
+    print(result)
     
-    # Databricksノートブック内でのSQLマジックコマンドの使用例
-    
-    # 1. 基本的なSQLクエリ
-    print("\n1. 基本的なSQLクエリ")
-    sql_query = """
-    SELECT 
-        current_timestamp() as current_time,
-        version() as spark_version,
-        current_user() as current_user
-    """
-    print("実行するクエリ:")
-    print(sql_query)
-    
-    # 2. テーブル情報の取得
-    print("\n2. テーブル情報の取得")
-    table_info_query = """
-    SELECT 
-        table_catalog,
-        table_schema,
-        table_name,
-        table_type
-    FROM information_schema.tables 
-    WHERE table_schema = 'default'
-    ORDER BY table_name
-    LIMIT 10
-    """
-    print("実行するクエリ:")
-    print(table_info_query)
-    
-    # 3. データサンプルの取得
-    print("\n3. データサンプルの取得")
-    sample_query = """
-    SELECT * 
-    FROM your_table_name 
-    LIMIT 10
-    """
-    print("実行するクエリ:")
-    print(sample_query)
-
-
-def databricks_widget_example():
-    """
-    Databricksウィジェットの使用例
-    """
-    print("=== Databricks Widget Example ===")
-    
-    # Databricksノートブック内でのウィジェット使用例
-    
-    # 1. パラメータウィジェットの作成
-    print("\n1. パラメータウィジェットの作成")
-    
-    # カタログ選択ウィジェット
-    catalog_widget_code = """
-    dbutils.widgets.text("catalog", "hive_metastore", "Catalog")
-    dbutils.widgets.text("schema", "default", "Schema")
-    dbutils.widgets.text("table_name", "", "Table Name")
-    dbutils.widgets.text("limit", "100", "Limit")
-    """
-    print("ウィジェット作成コード:")
-    print(catalog_widget_code)
-    
-    # 2. ウィジェット値の取得
-    print("\n2. ウィジェット値の取得")
-    get_widget_values_code = """
-    catalog = dbutils.widgets.get("catalog")
-    schema = dbutils.widgets.get("schema")
-    table_name = dbutils.widgets.get("table_name")
-    limit = int(dbutils.widgets.get("limit"))
-    
-    print(f"Catalog: {catalog}")
-    print(f"Schema: {schema}")
-    print(f"Table: {table_name}")
-    print(f"Limit: {limit}")
-    """
-    print("ウィジェット値取得コード:")
-    print(get_widget_values_code)
-    
-    # 3. 動的クエリの実行
-    print("\n3. 動的クエリの実行")
-    dynamic_query_code = """
-    if table_name:
-        query = f"SELECT * FROM {catalog}.{schema}.{table_name} LIMIT {limit}"
-        result = spark.sql(query)
-        display(result)
-    else:
-        print("テーブル名を指定してください")
-    """
-    print("動的クエリ実行コード:")
-    print(dynamic_query_code)
-
-
-def databricks_display_example():
-    """
-    Databricks display関数の使用例
-    """
-    print("=== Databricks Display Example ===")
-    
-    # 1. 基本的なdisplay関数の使用
-    print("\n1. 基本的なdisplay関数の使用")
-    display_code = """
-    # データフレームを表示
-    df = spark.sql("SELECT * FROM your_table LIMIT 10")
-    display(df)
-    
-    # グラフを表示
-    import plotly.express as px
-    fig = px.line(df.toPandas(), x='date_column', y='value_column')
-    display(fig)
-    """
-    print("display関数使用例:")
-    print(display_code)
-    
-    # 2. HTMLコンテンツの表示
-    print("\n2. HTMLコンテンツの表示")
-    html_display_code = """
-    from IPython.display import HTML
-    
-    html_content = '''
-    <div style="padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-        <h3>Databricks Database Access</h3>
-        <p>このHTMLはDatabricksノートブック内で表示されます。</p>
-        <button onclick="alert('Hello from Databricks!')">クリック</button>
-    </div>
-    '''
-    
-    display(HTML(html_content))
-    """
-    print("HTML表示例:")
-    print(html_display_code)
-
-
-def databricks_complete_example():
-    """
-    Databricksでの完全な使用例
-    """
-    print("=== Complete Databricks Example ===")
-    
-    # 完全なDatabricksノートブック例
-    
-    complete_example = """
-    # Databricksノートブック内での完全な使用例
-    
-    # 1. ライブラリのインポート
-    from db_ui_components.databricks_database import DatabricksDatabaseComponent, execute_sql, get_tables, preview_table
-    
-    # 2. データベースコンポーネントの作成
-    db = DatabricksDatabaseComponent(
-        component_id="my-database",
-        catalog="hive_metastore",
-        schema="default"
-    )
-    
-    # 3. テーブル一覧の取得
-    print("テーブル一覧を取得中...")
-    tables = get_tables()
-    print(f"テーブル数: {len(tables)}")
-    
-    # 4. 最初のテーブルをプレビュー
-    if len(tables) > 0:
-        first_table = tables.iloc[0]['table_name']
-        print(f"テーブル '{first_table}' をプレビュー中...")
-        preview = preview_table(first_table, limit=5)
-        display(preview)
-    
-    # 5. カスタムクエリの実行
-    print("カスタムクエリを実行中...")
-    custom_result = execute_sql("""
+    # より複雑なクエリ
+    result = execute_sql("""
         SELECT 
-            current_timestamp() as current_time,
-            version() as spark_version,
-            current_user() as current_user
+            current_date() as today,
+            current_timestamp() as now,
+            version() as spark_version
     """)
-    display(custom_result)
+    print("\nSystem info query result:")
+    print(result)
     
-    # 6. インタラクティブなウィジェットを表示
-    print("インタラクティブなウィジェットを表示中...")
-    display(db.display())
-    
-    # 7. テーブル統計情報の取得
-    if len(tables) > 0:
-        first_table = tables.iloc[0]['table_name']
-        print(f"テーブル '{first_table}' の統計情報を取得中...")
-        stats = db.get_table_stats(first_table)
-        print(f"行数: {stats['row_count']:,}")
-        print(f"列数: {stats['column_count']}")
-        print("列情報:")
-        for col in stats['columns']:
-            print(f"  - {col['column_name']}: {col['data_type']}")
-    """
-    
-    print("完全な使用例:")
-    print(complete_example)
+except Exception as e:
+    print(f"Query execution failed: {e}")
 
-
-if __name__ == "__main__":
-    # 各例を実行
-    databricks_notebook_example()
-    databricks_sql_magic_example()
-    databricks_widget_example()
-    databricks_display_example()
-    databricks_complete_example()
+# 3. テーブル一覧の取得
+print("\n--- Table Listing ---")
+try:
+    tables = get_tables(catalog="hive_metastore", schema="default")
+    print("Available tables:")
+    print(tables)
     
-    print("\n=== 使用例完了 ===")
-    print("Databricksノートブック内でこれらの例を実行してください。")
+    # テーブルが存在する場合の処理
+    if not tables.empty:
+        print(f"\nFound {len(tables)} tables")
+        for _, table in tables.iterrows():
+            print(f"- {table['table_name']} ({table['table_type']})")
+    else:
+        print("No tables found in the specified schema")
+        
+except Exception as e:
+    print(f"Table listing failed: {e}")
+
+# 4. テーブルプレビュー
+print("\n--- Table Preview ---")
+try:
+    # サンプルテーブルが存在する場合のプレビュー
+    sample_tables = ["sample_table", "users", "orders"]
+    
+    for table_name in sample_tables:
+        try:
+            preview = preview_table(table_name, limit=5)
+            print(f"\nPreview of {table_name}:")
+            print(preview)
+        except Exception as e:
+            print(f"Could not preview {table_name}: {e}")
+            
+except Exception as e:
+    print(f"Table preview failed: {e}")
+
+# 5. テーブル統計情報の取得
+print("\n--- Table Statistics ---")
+try:
+    for table_name in sample_tables:
+        try:
+            stats = get_table_stats(table_name)
+            print(f"\nStatistics for {table_name}:")
+            print(f"- Row count: {stats['row_count']}")
+            print(f"- Column count: {stats['column_count']}")
+            print(f"- Catalog: {stats['catalog']}")
+            print(f"- Schema: {stats['schema']}")
+        except Exception as e:
+            print(f"Could not get stats for {table_name}: {e}")
+            
+except Exception as e:
+    print(f"Statistics retrieval failed: {e}")
+
+# 6. コンポーネントのHTMLウィジェット表示
+print("\n--- HTML Widget Display ---")
+try:
+    # HTMLウィジェットを生成
+    widget_html = db.render()
+    print("Widget HTML generated successfully")
+    
+    # Databricks環境での表示
+    try:
+        from IPython.display import HTML, display
+        display(HTML(widget_html))
+        print("Widget displayed in notebook")
+    except ImportError:
+        print("IPython not available, HTML widget not displayed")
+        print("Widget HTML:")
+        print(widget_html[:500] + "..." if len(widget_html) > 500 else widget_html)
+        
+except Exception as e:
+    print(f"Widget generation failed: {e}")
+
+# 7. 高度な使用例
+print("\n--- Advanced Usage ---")
+
+# 複数のコンポーネントインスタンス
+db1 = create_databricks_database_component("db1", catalog="hive_metastore", schema="default")
+db2 = create_databricks_database_component("db2", catalog="hive_metastore", schema="default")
+
+# 並行処理の例
+import concurrent.futures
+
+def run_query(query):
+    """クエリを実行する関数"""
+    try:
+        return execute_sql(query)
+    except Exception as e:
+        return f"Error: {e}"
+
+# 複数のクエリを並行実行
+queries = [
+    "SELECT current_timestamp() as time1",
+    "SELECT current_date() as date1",
+    "SELECT version() as version1"
+]
+
+print("Running parallel queries...")
+with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+    results = list(executor.map(run_query, queries))
+
+for i, result in enumerate(results):
+    print(f"Query {i+1} result:")
+    print(result)
+    print()
+
+# 8. エラーハンドリングの例
+print("\n--- Error Handling Examples ---")
+
+# 存在しないテーブルへのアクセス
+try:
+    result = execute_sql("SELECT * FROM non_existent_table LIMIT 1")
+    print("Non-existent table query result:", result)
+except Exception as e:
+    print(f"Expected error for non-existent table: {e}")
+
+# 無効なSQLクエリ
+try:
+    result = execute_sql("INVALID SQL QUERY")
+    print("Invalid SQL query result:", result)
+except Exception as e:
+    print(f"Expected error for invalid SQL: {e}")
+
+# 9. パフォーマンステスト
+print("\n--- Performance Test ---")
+import time
+
+# クエリ実行時間の測定
+start_time = time.time()
+try:
+    result = execute_sql("SELECT current_timestamp() as test_time")
+    execution_time = time.time() - start_time
+    print(f"Query execution time: {execution_time:.3f} seconds")
+    print("Result:", result)
+except Exception as e:
+    print(f"Performance test failed: {e}")
+
+print("\n=== Example completed ===")
