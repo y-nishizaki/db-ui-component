@@ -284,8 +284,9 @@ class TestHTMLContent:
 
         html = chart.render()
 
-        # タイトルの存在確認
-        assert "売上データ" in html
+        # タイトルの存在確認（PlotlyのレイアウトまたはJSONデータ内）
+        # Plotlyの場合、タイトルがJavaScriptコード内にUnicodeエンコードされている可能性がある
+        assert "売上データ" in html or "\\u58f2\\u4e0a\\u30c7\\u30fc\\u30bf" in html
 
         # データの値が含まれているかの確認（JSON形式で）
         assert "100" in html

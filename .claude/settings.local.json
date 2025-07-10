@@ -17,7 +17,9 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(gh workflow view:*)",
+      "Bash(gh api:*)"
     ],
     "deny": []
   }
