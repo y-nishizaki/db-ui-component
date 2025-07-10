@@ -268,7 +268,7 @@ class ConfigStorage:
             "default_configs", {}
         ).items():
             config_class = config_converter.get_config_class(component_type)
-            if config_class and hasattr(config_class, 'from_dict'):
+            if config_class and hasattr(config_class, "from_dict"):
                 self._default_configs[component_type] = config_class.from_dict(
                     config_data
                 )
@@ -277,7 +277,7 @@ class ConfigStorage:
         for config_key, config_data in configs_dict.get("configs", {}).items():
             component_type = config_key.split("_")[0]
             config_class = config_converter.get_config_class(component_type)
-            if config_class and hasattr(config_class, 'from_dict'):
+            if config_class and hasattr(config_class, "from_dict"):
                 self._configs[config_key] = config_class.from_dict(config_data)
 
     def get_config(self, component_type: str, config_id: Optional[str] = None) -> Any:
@@ -312,7 +312,7 @@ class ConfigConverter:
 
     def get_config_class(self, component_type: str) -> Optional[type]:
         """設定クラスを取得"""
-        return self._config_classes.get(component_type)
+        return self._config_classes.get(component_type)  # type: ignore
 
     def register_config_class(self, component_type: str, config_class: type) -> None:
         """設定クラスを登録"""
