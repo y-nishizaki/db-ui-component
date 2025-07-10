@@ -565,9 +565,11 @@ class BubbleChartComponent(BaseComponent):
         """
         # サイズの正規化
         sizes = data[self.size_column].values
-        normalized_sizes = (sizes - sizes.min()) / (sizes.max() - sizes.min()) * 50 + 10
+        sizes_min = float(sizes.min())  # type: ignore
+        sizes_max = float(sizes.max())  # type: ignore
+        normalized_sizes = (sizes - sizes_min) / (sizes_max - sizes_min) * 50 + 10
 
-        bubble_data = {
+        bubble_data: Dict[str, Any] = {
             "type": "scatter",
             "x": data[self.x_column].tolist(),
             "y": data[self.y_column].tolist(),
@@ -587,9 +589,11 @@ class BubbleChartComponent(BaseComponent):
 
         # カラー分けがある場合
         if self.color_column:
-            bubble_data["marker"]["color"] = data[self.color_column].tolist()
-            bubble_data["marker"]["colorscale"] = "Viridis"
-            bubble_data["marker"]["showscale"] = True
-            bubble_data["marker"]["colorbar"] = {"title": self.color_column}
+            marker = bubble_data["marker"]
+            assert isinstance(marker, dict)  # type guard
+            marker["color"] = data[self.color_column].tolist()
+            marker["colorscale"] = "Viridis"
+            marker["showscale"] = True
+            marker["colorbar"] = {"title": self.color_column}
 
         return bubble_data

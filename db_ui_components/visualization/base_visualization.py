@@ -33,20 +33,25 @@ class BaseVisualizationComponent(BaseComponent):
         super().__init__(**kwargs)
         self.title = title
         self.height = height
+        self._data: Optional[pd.DataFrame] = None
 
-    def render(self, data: pd.DataFrame) -> str:
+    def set_data(self, data: pd.DataFrame) -> None:
+        """データを設定"""
+        self._data = data
+        
+    def render(self) -> str:
         """
         可視化コンポーネントをレンダリング
-
-        Args:
-            data: 可視化するデータフレーム
 
         Returns:
             レンダリングされたHTML
         """
+        if self._data is None:
+            return "<div>データが設定されていません</div>"
+            
         try:
             # データの前処理（サブクラスで実装）
-            chart_data = self._prepare_chart_data(data)
+            chart_data = self._prepare_chart_data(self._data)
 
             # HTMLテンプレートの生成
             html = self._generate_html_template(chart_data)

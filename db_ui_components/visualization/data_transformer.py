@@ -178,7 +178,7 @@ class NetworkDataTransformer(DataTransformer):
         self.source_column = source_column
         self.target_column = target_column
 
-    def transform(self, data: pd.DataFrame) -> List[Dict[str, Any]]:
+    def transform(self, data: pd.DataFrame) -> Dict[str, Any]:
         """
         ネットワークグラフ用のデータを変換
 
@@ -245,4 +245,4 @@ class NetworkDataTransformer(DataTransformer):
             "name": "Edges",
         }
 
-        return [edge_trace, node_trace]
+        return {"traces": [edge_trace, node_trace]}

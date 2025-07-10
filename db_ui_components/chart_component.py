@@ -7,7 +7,7 @@ Databricksダッシュボードで使用するグラフ・チャートを表示�
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-from typing import Optional, Dict, Any, Callable
+from typing import Optional, Dict, Any, Callable, List
 
 
 class ChartComponent:
@@ -51,7 +51,7 @@ class ChartComponent:
         self.title = title
         self.height = height
         self.kwargs = kwargs
-        self._click_handlers = []
+        self._click_handlers: List[Callable] = []
 
     def render(self) -> str:
         """
@@ -66,9 +66,9 @@ class ChartComponent:
         if hasattr(self, "_custom_style"):
             fig.update_layout(**self._custom_style)
 
-        return fig.to_html(
+        return str(fig.to_html(
             include_plotlyjs=True, full_html=False, config={"displayModeBar": True}
-        )
+        ))
 
     def _create_figure(self) -> go.Figure:
         """グラフを作成"""
