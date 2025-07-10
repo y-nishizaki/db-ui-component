@@ -137,21 +137,26 @@ class MultiselectFilterRenderer(FilterRenderer):
             options_html += f"""
             <label style="display: block; margin: 5px 0;">
                 <input type="checkbox" value="{option}"
-                       onchange="applyMultiselectFilter('{filter_id}', '{self.column}')">
+                       onchange="applyMultiselectFilter('{filter_id}',
+                                  '{self.column}')">
                 {option}
             </label>
             """
 
         html = f"""
         <div class="multiselect-filter" style="margin: 10px 0;">
-            {f'<label style="display: block; margin-bottom: 5px; font-weight: bold;">{self.title or self.column}</label>' if self.title else ''}
-            <div id="{filter_id}" style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+            {('<label style="display: block; margin-bottom: 5px; '
+              'font-weight: bold;">' + 
+              (self.title or self.column) + '</label>') if self.title else ''}
+            <div id="{filter_id}" style="max-height: 150px; overflow-y: auto;
+                 border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
                 {options_html}
             </div>
         </div>
         <script>
         function applyMultiselectFilter(filterId, column) {{
-            const checkboxes = document.querySelectorAll('#' + filterId + ' input[type="checkbox"]');
+            const checkboxes = document.querySelectorAll(
+                '#' + filterId + ' input[type="checkbox"]');
             const selectedValues = [];
 
             checkboxes.forEach(checkbox => {{
@@ -198,7 +203,9 @@ class TextFilterRenderer(FilterRenderer):
 
         html = f"""
         <div class="text-filter" style="margin: 10px 0;">
-            {f'<label style="display: block; margin-bottom: 5px; font-weight: bold;">{self.title or self.column}</label>' if self.title else ''}
+            {('<label style="display: block; margin-bottom: 5px; '
+              'font-weight: bold;">' + 
+              (self.title or self.column) + '</label>') if self.title else ''}
             <input type="text" id="{filter_id}"
                    placeholder="{placeholder}"
                    oninput="applyTextFilter('{filter_id}', '{self.column}')"
