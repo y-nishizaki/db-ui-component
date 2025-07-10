@@ -12,6 +12,15 @@ from .chart_component import ChartComponent
 from .table_component import TableComponent
 from .filter_component import FilterComponent
 from .dashboard import Dashboard
+from .database_component import DatabaseComponent, SparkComponent
+from .databricks_database import (
+    DatabricksDatabaseComponent,
+    create_databricks_database_component,
+    execute_sql,
+    get_tables,
+    preview_table,
+    get_table_stats
+)
 from .visualization import (
     SankeyChartComponent,
     HeatmapComponent,
@@ -31,6 +40,14 @@ __all__ = [
     "TableComponent", 
     "FilterComponent",
     "Dashboard",
+    "DatabaseComponent",
+    "SparkComponent",
+    "DatabricksDatabaseComponent",
+    "create_databricks_database_component",
+    "execute_sql",
+    "get_tables",
+    "preview_table",
+    "get_table_stats",
     "SankeyChartComponent",
     "HeatmapComponent",
     "NetworkGraphComponent",
