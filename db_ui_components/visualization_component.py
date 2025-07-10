@@ -410,20 +410,25 @@ class TreemapComponent(BaseComponent):
         self.values_column = values_column
         self.title = title
         self.height = height
+        self._data: Optional[pd.DataFrame] = None
 
+    def set_data(self, data: pd.DataFrame) -> None:
+        """データを設定"""
+        self._data = data
+        
     def render(self) -> str:
         """
         ツリーマップをレンダリング
 
-        Args:
-            data: 可視化するデータフレーム
-
         Returns:
             レンダリングされたHTML
         """
+        if self._data is None:
+            return "<div>データが設定されていません</div>"
+            
         try:
             # データの前処理
-            treemap_data = self._prepare_treemap_data(data)
+            treemap_data = self._prepare_treemap_data(self._data)
 
             # HTMLテンプレートの生成
             html = f"""
@@ -501,20 +506,25 @@ class BubbleChartComponent(BaseComponent):
         self.color_column = color_column
         self.title = title
         self.height = height
+        self._data: Optional[pd.DataFrame] = None
 
+    def set_data(self, data: pd.DataFrame) -> None:
+        """データを設定"""
+        self._data = data
+        
     def render(self) -> str:
         """
         バブルチャートをレンダリング
 
-        Args:
-            data: 可視化するデータフレーム
-
         Returns:
             レンダリングされたHTML
         """
+        if self._data is None:
+            return "<div>データが設定されていません</div>"
+            
         try:
             # データの前処理
-            bubble_data = self._prepare_bubble_data(data)
+            bubble_data = self._prepare_bubble_data(self._data)
 
             # HTMLテンプレートの生成
             html = f"""
