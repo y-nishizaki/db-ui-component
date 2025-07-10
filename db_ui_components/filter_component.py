@@ -31,7 +31,7 @@ class DateFilterRenderer(FilterRenderer):
         html = f"""
         <div class="date-filter" style="margin: 10px 0;">
             {('<label style="display: block; margin-bottom: 5px; '
-              'font-weight: bold;">' + 
+              'font-weight: bold;">' +
               (self.title or self.column) + '</label>') if self.title else ''}
             <div style="display: flex; gap: 10px; align-items: center;">
                 <input type="date" id="{filter_id}-start"
@@ -146,7 +146,7 @@ class MultiselectFilterRenderer(FilterRenderer):
         html = f"""
         <div class="multiselect-filter" style="margin: 10px 0;">
             {('<label style="display: block; margin-bottom: 5px; '
-              'font-weight: bold;">' + 
+              'font-weight: bold;">' +
               (self.title or self.column) + '</label>') if self.title else ''}
             <div id="{filter_id}" style="max-height: 150px; overflow-y: auto;
                  border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
@@ -204,7 +204,7 @@ class TextFilterRenderer(FilterRenderer):
         html = f"""
         <div class="text-filter" style="margin: 10px 0;">
             {('<label style="display: block; margin-bottom: 5px; '
-              'font-weight: bold;">' + 
+              'font-weight: bold;">' +
               (self.title or self.column) + '</label>') if self.title else ''}
             <input type="text" id="{filter_id}"
                    placeholder="{placeholder}"
