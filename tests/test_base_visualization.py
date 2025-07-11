@@ -94,11 +94,14 @@ class TestBaseVisualizationComponent:
         self.component._prepare_chart_data = Mock(side_effect=Exception("テストエラー"))
 
         data = pd.DataFrame({"test": [1, 2, 3]})
+        self.component.set_data(data)
 
         with pytest.raises(ComponentError) as exc_info:
-            self.component.render(data)
+            self.component.render()
 
-        assert "BaseVisualizationComponentのレンダリングに失敗しました" in str(exc_info.value)
+        assert "BaseVisualizationComponentのレンダリングに失敗しました" in str(
+            exc_info.value
+        )
         assert "テストエラー" in str(exc_info.value)
 
 
@@ -121,7 +124,9 @@ class TestConcreteVisualizationComponent:
 
     def setup_method(self):
         """テスト前のセットアップ"""
-        self.component = ConcreteVisualizationComponent(title="具象チャート", height=400)
+        self.component = ConcreteVisualizationComponent(
+            title="具象チャート", height=400
+        )
 
     def test_concrete_initialization(self):
         """具象クラスの初期化テスト"""
@@ -149,8 +154,9 @@ class TestConcreteVisualizationComponent:
     def test_render_success(self):
         """正常なレンダリングテスト"""
         data = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})
+        self.component.set_data(data)
 
-        html = self.component.render(data)
+        html = self.component.render()
 
         assert isinstance(html, str)
         assert "concrete-chart-" in html
@@ -186,17 +192,19 @@ class TestBaseVisualizationComponentEdgeCases:
         """空データのテスト"""
         component = ConcreteVisualizationComponent()
         empty_data = pd.DataFrame()
+        component.set_data(empty_data)
 
-        html = component.render(empty_data)
-        assert isinstance(html, str)
-        assert "concrete-chart-" in html
+        # Empty dataframe should raise an error
+        with pytest.raises(ComponentError):
+            component.render()
 
     def test_single_row_data(self):
         """単一行データのテスト"""
         component = ConcreteVisualizationComponent()
         single_data = pd.DataFrame({"x": [1], "y": [2]})
+        component.set_data(single_data)
 
-        html = component.render(single_data)
+        html = component.render()
         assert isinstance(html, str)
         assert "concrete-chart-" in html
 
@@ -204,18 +212,22 @@ class TestBaseVisualizationComponentEdgeCases:
         """大規模データのテスト"""
         component = ConcreteVisualizationComponent()
         large_data = pd.DataFrame({"x": list(range(1000)), "y": list(range(1000))})
+        component.set_data(large_data)
 
-        html = component.render(large_data)
+        html = component.render()
         assert isinstance(html, str)
         assert "concrete-chart-" in html
         assert len(html) > 0
 
     def test_special_characters_in_title(self):
         """タイトルに特殊文字を含むテスト"""
-        component = ConcreteVisualizationComponent(title='特殊文字テスト: "クォート" & <タグ>')
+        component = ConcreteVisualizationComponent(
+            title='特殊文字テスト: "クォート" & <タグ>'
+        )
 
         data = pd.DataFrame({"x": [1, 2], "y": [3, 4]})
-        html = component.render(data)
+        component.set_data(data)
+        html = component.render()
 
         assert isinstance(html, str)
         assert "特殊文字テスト" in html
@@ -225,7 +237,8 @@ class TestBaseVisualizationComponentEdgeCases:
         component = ConcreteVisualizationComponent(height=0)
 
         data = pd.DataFrame({"x": [1, 2], "y": [3, 4]})
-        html = component.render(data)
+        component.set_data(data)
+        html = component.render()
 
         assert isinstance(html, str)
         assert "height: 0px" in html
@@ -235,7 +248,8 @@ class TestBaseVisualizationComponentEdgeCases:
         component = ConcreteVisualizationComponent(height=9999)
 
         data = pd.DataFrame({"x": [1, 2], "y": [3, 4]})
-        html = component.render(data)
+        component.set_data(data)
+        html = component.render()
 
         assert isinstance(html, str)
         assert "height: 9999px" in html
@@ -251,8 +265,10 @@ class TestBaseVisualizationComponentIntegration:
 
         data = pd.DataFrame({"x": [1, 2], "y": [3, 4]})
 
-        html1 = component1.render(data)
-        html2 = component2.render(data)
+        component1.set_data(data)
+        component2.set_data(data)
+        html1 = component1.render()
+        html2 = component2.render()
 
         assert isinstance(html1, str)
         assert isinstance(html2, str)

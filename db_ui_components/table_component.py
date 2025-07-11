@@ -9,6 +9,7 @@ import pandas as pd
 from typing import Optional, Dict, Any, List
 import base64
 import io
+import html
 
 
 class TableDataManager:
@@ -118,9 +119,10 @@ class TableRenderer:
             sort_attr = (
                 f' onclick="sortTable(this, {columns.index(col)})"' if sortable else ""
             )
+            escaped_col = html.escape(str(col))
             table_html += (
                 f'<th style="padding: 12px; border: 1px solid #ddd; '
-                f'text-align: left; cursor: pointer;"{sort_attr}>{col}</th>'
+                f'text-align: left; cursor: pointer;"{sort_attr}>{escaped_col}</th>'
             )
 
         table_html += """
@@ -130,13 +132,18 @@ class TableRenderer:
         """
 
         # データ行の追加
-        for _, row in display_data.head(page_size).iterrows():
+        # page_sizeが0以下の場合は、すべてのデータを表示
+        rows_to_display = (
+            display_data if page_size <= 0 else display_data.head(page_size)
+        )
+
+        for _, row in rows_to_display.iterrows():
             table_html += "<tr>"
             for col in columns:
                 value = row[col] if pd.notna(row[col]) else ""
-                table_html += (
-                    f'<td style="padding: 8px; border: 1px solid #ddd;">{value}</td>'
-                )
+                # HTMLエスケープを適用
+                escaped_value = html.escape(str(value))
+                table_html += f'<td style="padding: 8px; border: 1px solid #ddd;">{escaped_value}</td>'
             table_html += "</tr>"
 
         table_html += """
@@ -188,6 +195,11 @@ class TableRenderer:
     def render_pagination(self, page_size: int) -> str:
         """ページネーションをレンダリング"""
         display_data = self.data_manager.get_display_data()
+
+        # page_sizeが0以下の場合は、ページネーションを表示しない
+        if page_size <= 0:
+            return ""
+
         total_pages = (len(display_data) + page_size - 1) // page_size
 
         if total_pages <= 1:

@@ -59,7 +59,9 @@ class BaseVisualizationComponent(BaseComponent):
             return html
 
         except Exception as e:
-            raise ComponentError(f"{self.__class__.__name__}のレンダリングに失敗しました: {str(e)}")
+            raise ComponentError(
+                f"{self.__class__.__name__}のレンダリングに失敗しました: {str(e)}"
+            )
 
     def _prepare_chart_data(self, data: pd.DataFrame) -> Dict[str, Any]:
         """

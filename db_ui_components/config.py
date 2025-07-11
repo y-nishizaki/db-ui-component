@@ -203,6 +203,14 @@ class ChartConfig(ComponentConfig):
         )
         return base_dict
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "ChartConfig":
+        """辞書から設定を復元"""
+        # chart_typeを文字列からEnumに変換
+        if "chart_type" in data and isinstance(data["chart_type"], str):
+            data["chart_type"] = ChartType(data["chart_type"])
+        return cls(**data)
+
 
 @dataclass
 class FilterConfig(ComponentConfig):
@@ -234,6 +242,14 @@ class FilterConfig(ComponentConfig):
         )
         return base_dict
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "FilterConfig":
+        """辞書から設定を復元"""
+        # filter_typeを文字列からEnumに変換
+        if "filter_type" in data and isinstance(data["filter_type"], str):
+            data["filter_type"] = FilterType(data["filter_type"])
+        return cls(**data)
+
 
 class ConfigStorage:
     """設定ストレージクラス"""
@@ -244,15 +260,22 @@ class ConfigStorage:
 
     def save_configs(self, filename: str) -> None:
         """設定をファイルに保存"""
+
+        def serialize_value(v):
+            """値をシリアライズ可能な形式に変換"""
+            if hasattr(v, "to_dict"):
+                return v.to_dict()
+            elif isinstance(v, (dict, list, str, int, float, bool, type(None))):
+                return v
+            else:
+                # シリアライズできないオブジェクトは文字列表現を返す
+                return str(v)
+
         configs_dict = {
             "default_configs": {
-                k: v.to_dict() if hasattr(v, "to_dict") else v
-                for k, v in self._default_configs.items()
+                k: serialize_value(v) for k, v in self._default_configs.items()
             },
-            "configs": {
-                k: v.to_dict() if hasattr(v, "to_dict") else v
-                for k, v in self._configs.items()
-            },
+            "configs": {k: serialize_value(v) for k, v in self._configs.items()},
         }
 
         with open(filename, "w", encoding="utf-8") as f:
@@ -272,6 +295,9 @@ class ConfigStorage:
                 self._default_configs[component_type] = config_class.from_dict(
                     config_data
                 )
+            else:
+                # 設定クラスが見つからない場合は、データをそのまま保存
+                self._default_configs[component_type] = config_data
 
         # 個別設定の復元
         for config_key, config_data in configs_dict.get("configs", {}).items():
@@ -279,6 +305,9 @@ class ConfigStorage:
             config_class = config_converter.get_config_class(component_type)
             if config_class and hasattr(config_class, "from_dict"):
                 self._configs[config_key] = config_class.from_dict(config_data)
+            else:
+                # 設定クラスが見つからない場合は、データをそのまま保存
+                self._configs[config_key] = config_data
 
     def get_config(self, component_type: str, config_id: Optional[str] = None) -> Any:
         """設定を取得"""
@@ -325,6 +354,9 @@ class ConfigValidator:
     @staticmethod
     def validate_component_config(config: ComponentConfig) -> bool:
         """コンポーネント設定を検証"""
+        # 型チェック
+        if not isinstance(config, ComponentConfig):
+            return False
         if config.height < 0:
             return False
         if config.width is not None and config.width < 0:
@@ -404,9 +436,12 @@ class ConfigManager:
             config: 設定オブジェクト
             config_id: 設定ID
         """
-        # 設定を検証
-        if not self._validate_config(component_type, config):
-            raise ValueError(f"Invalid config for component type: {component_type}")
+        # 既知のコンポーネントタイプの場合のみ検証を行う
+        known_types = ["table", "chart", "filter", "dashboard"]
+        if component_type in known_types:
+            # 設定を検証
+            if not self._validate_config(component_type, config):
+                raise ValueError(f"Invalid config for component type: {component_type}")
 
         self.storage.set_config(component_type, config, config_id)
 
@@ -430,14 +465,26 @@ class ConfigManager:
 
     def _validate_config(self, component_type: str, config: Any) -> bool:
         """設定を検証"""
+        # configがNoneまたは適切な型でない場合はFalseを返す
+        if config is None:
+            return False
+
         if component_type == "table":
-            return bool(self.validator.validate_table_config(config))
+            return isinstance(config, TableConfig) and bool(
+                self.validator.validate_table_config(config)
+            )
         elif component_type == "chart":
-            return bool(self.validator.validate_chart_config(config))
+            return isinstance(config, ChartConfig) and bool(
+                self.validator.validate_chart_config(config)
+            )
         elif component_type == "filter":
-            return bool(self.validator.validate_filter_config(config))
+            return isinstance(config, FilterConfig) and bool(
+                self.validator.validate_filter_config(config)
+            )
         else:
-            return bool(self.validator.validate_component_config(config))
+            return isinstance(config, ComponentConfig) and bool(
+                self.validator.validate_component_config(config)
+            )
 
 
 # グローバル設定マネージャー

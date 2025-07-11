@@ -7,7 +7,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from unittest.mock import Mock, patch
+from typing import Dict, Any
 from db_ui_components.visualization.data_transformer import (
     DataTransformer,
     SankeyDataTransformer,
@@ -16,12 +16,20 @@ from db_ui_components.visualization.data_transformer import (
 )
 
 
+class TestDataTransformerConcrete(DataTransformer):
+    """テスト用の具体的なDataTransformer実装"""
+
+    def transform(self, data: pd.DataFrame) -> Dict[str, Any]:
+        """ダミーの変換実装"""
+        return {"data": data.to_dict()}
+
+
 class TestDataTransformerUncovered:
     """DataTransformerの未カバー部分のテスト"""
 
     def setup_method(self):
         """テスト前のセットアップ"""
-        self.transformer = Mock(spec=DataTransformer)
+        self.transformer = TestDataTransformerConcrete()
 
     def test_validate_data_empty_dataframe(self):
         """空のデータフレームでの検証テスト"""
@@ -269,10 +277,11 @@ class TestNetworkDataTransformerUncovered:
 
         result = self.transformer.transform(data)
 
-        assert isinstance(result, list)
-        assert len(result) > 0
-        assert all("source" in item for item in result)
-        assert all("target" in item for item in result)
+        assert isinstance(result, dict)
+        assert "traces" in result
+        assert len(result["traces"]) == 2  # エッジとノードのトレース
+        assert result["traces"][0]["name"] == "Edges"
+        assert result["traces"][1]["name"] == "Nodes"
 
     def test_transform_with_single_edge(self):
         """単一エッジでの変換テスト"""
@@ -280,10 +289,11 @@ class TestNetworkDataTransformerUncovered:
 
         result = self.transformer.transform(data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert "source" in result[0]
-        assert "target" in result[0]
+        assert isinstance(result, dict)
+        assert "traces" in result
+        assert len(result["traces"]) == 2
+        # ノードが2つあることを確認
+        assert len(result["traces"][1]["text"]) == 2
 
     def test_transform_with_large_dataset(self):
         """大規模データセットでの変換テスト"""
@@ -295,10 +305,11 @@ class TestNetworkDataTransformerUncovered:
 
         result = self.transformer.transform(data)
 
-        assert isinstance(result, list)
-        assert len(result) > 0
-        assert all("source" in item for item in result)
-        assert all("target" in item for item in result)
+        assert isinstance(result, dict)
+        assert "traces" in result
+        assert len(result["traces"]) == 2  # エッジとノードのトレース
+        assert result["traces"][0]["name"] == "Edges"
+        assert result["traces"][1]["name"] == "Nodes"
 
     def test_transform_with_numeric_nodes(self):
         """数値ノードでの変換テスト"""
@@ -306,10 +317,11 @@ class TestNetworkDataTransformerUncovered:
 
         result = self.transformer.transform(data)
 
-        assert isinstance(result, list)
-        assert len(result) > 0
-        assert all("source" in item for item in result)
-        assert all("target" in item for item in result)
+        assert isinstance(result, dict)
+        assert "traces" in result
+        assert len(result["traces"]) == 2  # エッジとノードのトレース
+        assert result["traces"][0]["name"] == "Edges"
+        assert result["traces"][1]["name"] == "Nodes"
 
     def test_transform_with_mixed_data_types(self):
         """混合データ型での変換テスト"""
@@ -319,10 +331,11 @@ class TestNetworkDataTransformerUncovered:
 
         result = self.transformer.transform(data)
 
-        assert isinstance(result, list)
-        assert len(result) > 0
-        assert all("source" in item for item in result)
-        assert all("target" in item for item in result)
+        assert isinstance(result, dict)
+        assert "traces" in result
+        assert len(result["traces"]) == 2  # エッジとノードのトレース
+        assert result["traces"][0]["name"] == "Edges"
+        assert result["traces"][1]["name"] == "Nodes"
 
 
 class TestDataTransformerEdgeCases:
@@ -432,8 +445,9 @@ class TestDataTransformerIntegration:
         # 結果の検証
         assert sankey_result["type"] == "sankey"
         assert heatmap_result["type"] == "heatmap"
-        assert isinstance(network_result, list)
-        assert len(network_result) > 0
+        assert isinstance(network_result, dict)
+        assert "traces" in network_result
+        assert len(network_result["traces"]) == 2
 
     def test_transformer_validation_integration(self):
         """変換器検証の統合テスト"""
@@ -479,8 +493,9 @@ class TestDataTransformerIntegration:
                 assert len(result["link"]) > 0
             else:
                 result = transformer.transform(data)
-                assert isinstance(result, list)
-                assert len(result) > 0
+                assert isinstance(result, dict)
+                assert "traces" in result
+                assert len(result["traces"]) == 2
 
     def test_data_type_handling(self):
         """データ型処理のテスト"""

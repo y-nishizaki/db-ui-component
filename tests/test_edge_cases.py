@@ -126,7 +126,11 @@ class TestChartComponentEdgeCases:
         html = chart.render()
         assert isinstance(html, str)
         assert len(html) > 0
-        assert "日本語テストグラフ" in html
+        # PlotlyはUnicode文字をエスケープシーケンスに変換するため、エスケープされた形式で確認
+        assert (
+            "\\u65e5\\u672c\\u8a9e\\u30c6\\u30b9\\u30c8\\u30b0\\u30e9\\u30d5" in html
+            or "日本語テストグラフ" in html
+        )
 
     def test_negative_height(self):
         """負の高さでのテスト"""

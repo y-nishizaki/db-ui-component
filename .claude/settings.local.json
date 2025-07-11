@@ -19,7 +19,10 @@
       "Bash(git push:*)",
       "Bash(find:*)",
       "Bash(gh workflow view:*)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Bash(rm:*)",
+      "Bash(pytest:*)",
+      "Bash(mypy:*)"
     ],
     "deny": []
   }

@@ -87,7 +87,9 @@ class SankeyChartComponent(BaseComponent):
             return html
 
         except Exception as e:
-            raise ComponentError(f"サンキーチャートのレンダリングに失敗しました: {str(e)}")
+            raise ComponentError(
+                f"サンキーチャートのレンダリングに失敗しました: {str(e)}"
+            )
 
     def _prepare_sankey_data(self, data: pd.DataFrame) -> Dict:
         """
@@ -307,7 +309,9 @@ class NetworkGraphComponent(BaseComponent):
             return html
 
         except Exception as e:
-            raise ComponentError(f"ネットワークグラフのレンダリングに失敗しました: {str(e)}")
+            raise ComponentError(
+                f"ネットワークグラフのレンダリングに失敗しました: {str(e)}"
+            )
 
     def _prepare_network_data(self, data: pd.DataFrame) -> List[Dict]:
         """
@@ -551,7 +555,9 @@ class BubbleChartComponent(BaseComponent):
             return html
 
         except Exception as e:
-            raise ComponentError(f"バブルチャートのレンダリングに失敗しました: {str(e)}")
+            raise ComponentError(
+                f"バブルチャートのレンダリングに失敗しました: {str(e)}"
+            )
 
     def _prepare_bubble_data(self, data: pd.DataFrame) -> Dict:
         """

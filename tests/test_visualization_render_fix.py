@@ -141,8 +141,13 @@ class TestVisualizationRenderFix:
             source_column="invalid", target_column="invalid", value_column="invalid"
         )
 
-        # 無効なデータでもクラッシュしないことを確認
+        # 無効なデータでComponentErrorが発生することを確認
         invalid_data = pd.DataFrame({"col1": [1, 2, 3]})
         component.set_data(invalid_data)
-        html = component.render()
-        assert "エラー" in html or "error" in html.lower()
+
+        from db_ui_components.exceptions import ComponentError
+
+        with pytest.raises(
+            ComponentError, match="サンキーチャートのレンダリングに失敗しました"
+        ):
+            component.render()

@@ -722,20 +722,24 @@ class SparkComponent(BaseComponent):
                     [
                         html.H4("Spark Session Status"),
                         html.Div(
-                            "Spark session initialized"
-                            if self.spark_session
-                            else "No Spark session",
+                            (
+                                "Spark session initialized"
+                                if self.spark_session
+                                else "No Spark session"
+                            ),
                             style={
                                 "padding": "10px",
                                 "margin": "10px 0",
                                 "border-radius": "5px",
-                                "background-color": "#d4edda"
-                                if self.spark_session
-                                else "#f8d7da",
+                                "background-color": (
+                                    "#d4edda" if self.spark_session else "#f8d7da"
+                                ),
                                 "color": "#155724" if self.spark_session else "#721c24",
-                                "border": "1px solid #c3e6cb"
-                                if self.spark_session
-                                else "1px solid #f5c6cb",
+                                "border": (
+                                    "1px solid #c3e6cb"
+                                    if self.spark_session
+                                    else "1px solid #f5c6cb"
+                                ),
                             },
                         ),
                     ]
@@ -787,10 +791,11 @@ class SparkComponent(BaseComponent):
 
     def stop_session(self):
         """Sparkセッションを停止"""
-        if self.spark_session:
+        if hasattr(self, "spark_session") and self.spark_session:
             self.spark_session.stop()
             logging.info("Spark session stopped")
 
     def __del__(self):
         """デストラクタでセッションを停止"""
-        self.stop_session()
+        if hasattr(self, "spark_session"):
+            self.stop_session()

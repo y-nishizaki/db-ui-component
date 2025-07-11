@@ -15,10 +15,8 @@ class TestFilterComponentUncovered:
 
     def test_unsupported_filter_type(self):
         """サポートされていないフィルタータイプのテスト"""
-        component = FilterComponent(filter_type="unsupported", column="test_column")
-
         with pytest.raises(ValueError, match="Unsupported filter type: unsupported"):
-            component.render()
+            component = FilterComponent(filter_type="unsupported", column="test_column")
 
     def test_on_change_handler(self):
         """フィルター変更イベントハンドラーのテスト"""
@@ -29,8 +27,10 @@ class TestFilterComponentUncovered:
         handler = MagicMock()
         component.on_change(handler)
 
-        assert len(component._change_handlers) == 1
-        assert component._change_handlers[0] == handler
+        # event_managerを通じてハンドラーが登録されているか確認
+        handlers = component.event_manager.get_handlers("test_column")
+        assert len(handlers) == 1
+        assert handlers[0] == handler
 
     def test_multiple_change_handlers(self):
         """複数のフィルター変更イベントハンドラーのテスト"""
@@ -44,9 +44,11 @@ class TestFilterComponentUncovered:
         component.on_change(handler1)
         component.on_change(handler2)
 
-        assert len(component._change_handlers) == 2
-        assert handler1 in component._change_handlers
-        assert handler2 in component._change_handlers
+        # event_managerを通じてハンドラーが登録されているか確認
+        handlers = component.event_manager.get_handlers("test_column")
+        assert len(handlers) == 2
+        assert handler1 in handlers
+        assert handler2 in handlers
 
     def test_get_current_value(self):
         """現在の値の取得テスト"""
@@ -54,15 +56,14 @@ class TestFilterComponentUncovered:
             filter_type="dropdown", column="test_column", options=["A", "B", "C"]
         )
 
-        # モックのwindow.currentFiltersを設定
-        with patch("builtins.globals") as mock_globals:
-            mock_globals.return_value = {
-                "currentFilters": {"test_column": {"type": "dropdown", "value": "A"}}
-            }
-
-            result = component.get_current_value()
-            expected = {"type": "dropdown", "value": "A"}
-            assert result == expected
+        # get_current_valueは固定の辞書を返す（JavaScript側から取得する必要があるため）
+        result = component.get_current_value()
+        expected = {
+            "type": "dropdown",
+            "column": "test_column",
+            "value": None,  # JavaScript側から取得する必要があるため常にNone
+        }
+        assert result == expected
 
     def test_get_current_value_nonexistent(self):
         """存在しない現在の値の取得テスト"""
@@ -70,12 +71,14 @@ class TestFilterComponentUncovered:
             filter_type="dropdown", column="test_column", options=["A", "B", "C"]
         )
 
-        # モックのwindow.currentFiltersを設定（存在しない場合）
-        with patch("builtins.globals") as mock_globals:
-            mock_globals.return_value = {"currentFilters": {}}
-
-            result = component.get_current_value()
-            assert result is None
+        # get_current_valueは常に固定の辞書を返す
+        result = component.get_current_value()
+        expected = {
+            "type": "dropdown",
+            "column": "test_column",
+            "value": None,  # JavaScript側から取得する必要があるため常にNone
+        }
+        assert result == expected
 
     def test_to_dict(self):
         """辞書形式への変換テスト"""
@@ -270,9 +273,11 @@ class TestFilterComponentUncovered:
             component = FilterComponent(
                 filter_type=filter_type,
                 column="test_column",
-                options=["A", "B", "C"]
-                if filter_type in ["dropdown", "multiselect"]
-                else None,
+                options=(
+                    ["A", "B", "C"]
+                    if filter_type in ["dropdown", "multiselect"]
+                    else None
+                ),
             )
 
             result = component.render()

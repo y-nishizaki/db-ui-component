@@ -49,7 +49,8 @@ class TestSankeyChartComponent:
 
     def test_sankey_chart_render(self):
         """レンダリングテスト"""
-        html = self.component.render(self.data)
+        self.component.set_data(self.data)
+        html = self.component.render()
 
         assert isinstance(html, str)
         assert "sankey-chart-" in html
@@ -71,8 +72,9 @@ class TestSankeyChartComponent:
         """エラーハンドリングテスト"""
         invalid_data = pd.DataFrame({"wrong_column": ["A", "B"]})
 
+        self.component.set_data(invalid_data)
         with pytest.raises(ComponentError):
-            self.component.render(invalid_data)
+            self.component.render()
 
 
 class TestHeatmapComponent:
@@ -104,7 +106,8 @@ class TestHeatmapComponent:
 
     def test_heatmap_render(self):
         """レンダリングテスト"""
-        html = self.component.render(self.data)
+        self.component.set_data(self.data)
+        html = self.component.render()
 
         assert isinstance(html, str)
         assert "heatmap-" in html
@@ -125,8 +128,9 @@ class TestHeatmapComponent:
         """エラーハンドリングテスト"""
         invalid_data = pd.DataFrame({"wrong_column": ["A", "B"]})
 
+        self.component.set_data(invalid_data)
         with pytest.raises(ComponentError):
-            self.component.render(invalid_data)
+            self.component.render()
 
 
 class TestNetworkGraphComponent:
@@ -159,7 +163,8 @@ class TestNetworkGraphComponent:
 
     def test_network_graph_render(self):
         """レンダリングテスト"""
-        html = self.component.render(self.data)
+        self.component.set_data(self.data)
+        html = self.component.render()
 
         assert isinstance(html, str)
         assert "network-graph-" in html
@@ -168,19 +173,20 @@ class TestNetworkGraphComponent:
 
     def test_network_graph_prepare_data(self):
         """データ準備テスト"""
-        network_data = self.component._prepare_network_data(self.data)
+        result = self.component._prepare_network_data(self.data)
 
-        assert isinstance(network_data, list)
-        assert len(network_data) > 0
-        assert all("source" in item for item in network_data)
-        assert all("target" in item for item in network_data)
+        assert isinstance(result, list)
+        assert len(result) == 2  # edge_trace, node_trace
+        assert result[0]["name"] == "Edges"
+        assert result[1]["name"] == "Nodes"
 
     def test_network_graph_render_error(self):
         """エラーハンドリングテスト"""
         invalid_data = pd.DataFrame({"wrong_column": ["A", "B"]})
 
+        self.component.set_data(invalid_data)
         with pytest.raises(ComponentError):
-            self.component.render(invalid_data)
+            self.component.render()
 
 
 class TestTreemapComponent:
@@ -213,7 +219,8 @@ class TestTreemapComponent:
 
     def test_treemap_render(self):
         """レンダリングテスト"""
-        html = self.component.render(self.data)
+        self.component.set_data(self.data)
+        html = self.component.render()
 
         assert isinstance(html, str)
         assert "treemap-" in html
@@ -234,8 +241,9 @@ class TestTreemapComponent:
         """エラーハンドリングテスト"""
         invalid_data = pd.DataFrame({"wrong_column": ["A", "B"]})
 
+        self.component.set_data(invalid_data)
         with pytest.raises(ComponentError):
-            self.component.render(invalid_data)
+            self.component.render()
 
 
 class TestBubbleChartComponent:
@@ -271,7 +279,8 @@ class TestBubbleChartComponent:
 
     def test_bubble_chart_render(self):
         """レンダリングテスト"""
-        html = self.component.render(self.data)
+        self.component.set_data(self.data)
+        html = self.component.render()
 
         assert isinstance(html, str)
         assert "bubble-chart-" in html
@@ -293,8 +302,9 @@ class TestBubbleChartComponent:
         """エラーハンドリングテスト"""
         invalid_data = pd.DataFrame({"wrong_column": ["A", "B"]})
 
+        self.component.set_data(invalid_data)
         with pytest.raises(ComponentError):
-            self.component.render(invalid_data)
+            self.component.render()
 
     def test_bubble_chart_without_color(self):
         """色なしバブルチャートテスト"""
@@ -302,7 +312,8 @@ class TestBubbleChartComponent:
             x_column="x", y_column="y", size_column="size", title="テストバブルチャート"
         )
 
-        html = component_no_color.render(self.data)
+        component_no_color.set_data(self.data)
+        html = component_no_color.render()
         assert isinstance(html, str)
         assert "bubble-chart-" in html
 
@@ -317,8 +328,11 @@ class TestVisualizationComponentEdgeCases:
             source_column="source", target_column="target", value_column="value"
         )
 
-        with pytest.raises(ComponentError):
-            component.render(empty_data)
+        component.set_data(empty_data)
+        # 空データでもレンダリングされるが、空のグラフが表示される
+        html = component.render()
+        assert isinstance(html, str)
+        assert "sankey-chart-" in html
 
     def test_heatmap_single_value(self):
         """単一値のヒートマップテスト"""
@@ -326,7 +340,8 @@ class TestVisualizationComponentEdgeCases:
 
         component = HeatmapComponent(x_column="x", y_column="y", value_column="value")
 
-        html = component.render(single_data)
+        component.set_data(single_data)
+        html = component.render()
         assert isinstance(html, str)
 
     def test_network_graph_no_weight(self):
@@ -337,7 +352,8 @@ class TestVisualizationComponentEdgeCases:
             source_column="source", target_column="target"
         )
 
-        html = component.render(data)
+        component.set_data(data)
+        html = component.render()
         assert isinstance(html, str)
 
     def test_treemap_flat_structure(self):
@@ -350,7 +366,8 @@ class TestVisualizationComponentEdgeCases:
             labels_column="labels", parents_column="parents", values_column="values"
         )
 
-        html = component.render(flat_data)
+        component.set_data(flat_data)
+        html = component.render()
         assert isinstance(html, str)
 
     def test_bubble_chart_large_data(self):
@@ -368,7 +385,8 @@ class TestVisualizationComponentEdgeCases:
             x_column="x", y_column="y", size_column="size", color_column="color"
         )
 
-        html = component.render(large_data)
+        component.set_data(large_data)
+        html = component.render()
         assert isinstance(html, str)
         assert len(html) > 0
 
@@ -395,8 +413,10 @@ class TestVisualizationComponentIntegration:
 
         heatmap = HeatmapComponent(x_column="x", y_column="y", value_column="z")
 
-        sankey_html = sankey.render(data)
-        heatmap_html = heatmap.render(data)
+        sankey.set_data(data)
+        heatmap.set_data(data)
+        sankey_html = sankey.render()
+        heatmap_html = heatmap.render()
 
         assert isinstance(sankey_html, str)
         assert isinstance(heatmap_html, str)

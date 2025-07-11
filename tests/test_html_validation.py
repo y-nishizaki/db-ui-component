@@ -273,7 +273,9 @@ class TestHTMLValidation:
 class TestHTMLContent:
     """HTML内容の妥当性テスト"""
 
-    @pytest.mark.skip(reason="Plotlyのバージョンによって日本語エンコーディングが異なるため一時的にスキップ")
+    @pytest.mark.skip(
+        reason="Plotlyのバージョンによって日本語エンコーディングが異なるため一時的にスキップ"
+    )
     def test_chart_content_accuracy(self):
         """チャート内容の正確性テスト"""
         df = pd.DataFrame({"category": ["A", "B", "C"], "value": [100, 200, 300]})
@@ -300,7 +302,11 @@ class TestHTMLContent:
     def test_table_content_accuracy(self):
         """テーブル内容の正確性テスト"""
         df = pd.DataFrame(
-            {"ID": [1, 2, 3], "名前": ["製品A", "製品B", "製品C"], "価格": [1000, 2000, 3000]}
+            {
+                "ID": [1, 2, 3],
+                "名前": ["製品A", "製品B", "製品C"],
+                "価格": [1000, 2000, 3000],
+            }
         )
 
         table = TableComponent(data=df)

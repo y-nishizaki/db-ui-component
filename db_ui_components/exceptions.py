@@ -8,7 +8,11 @@
 class ComponentError(Exception):
     """コンポーネント関連の基本例外クラス"""
 
-    pass
+    def __init__(self, message, **kwargs):
+        super().__init__(message)
+        self.message = message
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 
 class ValidationError(ComponentError):

@@ -49,7 +49,8 @@ class ChartComponent:
         self.x_column = x_column
         self.y_column = y_column
         self.title = title
-        self.height = height
+        # Plotlyは高さが10以上でなければエラーになるため、最小値を設定
+        self.height = max(height, 10) if height is not None else 400
         self.kwargs = kwargs
         self._click_handlers: List[Callable] = []
 

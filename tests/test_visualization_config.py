@@ -448,7 +448,13 @@ class TestVisualizationConfigIntegration:
             config_dict = config.to_dict()
             assert "title" in config_dict
             assert "height" in config_dict
-            assert config_dict["title"] in ["基本", "サンキー", "ヒートマップ", "ネットワーク", "バブル"]
+            assert config_dict["title"] in [
+                "基本",
+                "サンキー",
+                "ヒートマップ",
+                "ネットワーク",
+                "バブル",
+            ]
 
     def test_config_validation_integration(self):
         """設定検証の統合テスト"""

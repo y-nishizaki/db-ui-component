@@ -140,6 +140,7 @@ class TestDataTransformer:
         transformer = Mock(spec=DataTransformer)
         data = pd.DataFrame()
 
+        transformer.validate_data.return_value = False
         result = transformer.validate_data(data, ["col1", "col2"])
         assert result is False
 
@@ -148,6 +149,7 @@ class TestDataTransformer:
         transformer = Mock(spec=DataTransformer)
         data = pd.DataFrame({"col1": [1, 2, 3]})
 
+        transformer.validate_data.return_value = False
         result = transformer.validate_data(data, ["col1", "col2"])
         assert result is False
 
@@ -156,6 +158,7 @@ class TestDataTransformer:
         transformer = Mock(spec=DataTransformer)
         data = pd.DataFrame({"col1": [1, 2, 3], "col2": [4, 5, 6]})
 
+        transformer.validate_data.return_value = True
         result = transformer.validate_data(data, ["col1", "col2"])
         assert result is True
 
@@ -250,10 +253,12 @@ class TestNetworkDataTransformer:
         """データ変換テスト"""
         result = self.transformer.transform(self.test_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 2  # edge_trace, node_trace
-        assert result[0]["name"] == "Edges"
-        assert result[1]["name"] == "Nodes"
+        assert isinstance(result, dict)
+        assert "traces" in result
+        assert isinstance(result["traces"], list)
+        assert len(result["traces"]) == 2  # edge_trace, node_trace
+        assert result["traces"][0]["name"] == "Edges"
+        assert result["traces"][1]["name"] == "Nodes"
 
     def test_network_data_transformer_missing_columns(self):
         """不足列のエラーテスト"""
@@ -302,7 +307,8 @@ class TestSankeyChartComponent:
 
     def test_sankey_chart_component_render(self):
         """レンダリングテスト"""
-        html = self.component.render(self.test_data)
+        self.component.set_data(self.test_data)
+        html = self.component.render()
 
         assert isinstance(html, str)
         assert "sankey-chart" in html
@@ -355,7 +361,8 @@ class TestHeatmapComponent:
 
     def test_heatmap_component_render(self):
         """レンダリングテスト"""
-        html = self.component.render(self.test_data)
+        self.component.set_data(self.test_data)
+        html = self.component.render()
 
         assert isinstance(html, str)
         assert "heatmap" in html
@@ -389,10 +396,12 @@ class TestNetworkGraphComponent:
         """データ準備テスト"""
         result = self.component._prepare_chart_data(self.test_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 2
-        assert result[0]["name"] == "Edges"
-        assert result[1]["name"] == "Nodes"
+        assert isinstance(result, dict)
+        assert "traces" in result
+        assert isinstance(result["traces"], list)
+        assert len(result["traces"]) == 2
+        assert result["traces"][0]["name"] == "Edges"
+        assert result["traces"][1]["name"] == "Nodes"
 
     def test_network_graph_component_get_chart_type(self):
         """チャートタイプ取得テスト"""
@@ -401,7 +410,8 @@ class TestNetworkGraphComponent:
 
     def test_network_graph_component_render(self):
         """レンダリングテスト"""
-        html = self.component.render(self.test_data)
+        self.component.set_data(self.test_data)
+        html = self.component.render()
 
         assert isinstance(html, str)
         assert "network-graph" in html
@@ -448,7 +458,8 @@ class TestTreemapComponent:
 
     def test_treemap_component_render(self):
         """レンダリングテスト"""
-        html = self.component.render(self.test_data)
+        self.component.set_data(self.test_data)
+        html = self.component.render()
 
         assert isinstance(html, str)
         assert "treemap" in html
@@ -502,7 +513,8 @@ class TestBubbleChartComponent:
 
     def test_bubble_chart_component_render(self):
         """レンダリングテスト"""
-        html = self.component.render(self.test_data)
+        self.component.set_data(self.test_data)
+        html = self.component.render()
 
         assert isinstance(html, str)
         assert "bubble-chart" in html
@@ -539,7 +551,8 @@ class TestIntegration:
         ]
 
         for component in components:
-            html = component.render(data)
+            component.set_data(data)
+            html = component.render()
             assert isinstance(html, str)
             assert "Plotly.newPlot" in html
 

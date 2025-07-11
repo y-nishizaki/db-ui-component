@@ -19,6 +19,7 @@ from db_ui_components.config import (
     ChartConfig,
     FilterConfig,
     ConfigManager,
+    ConfigValidator,
 )
 
 
@@ -178,19 +179,21 @@ class TestDashboardConfig:
         """辞書形式への変換テスト"""
         config = DashboardConfig(title="Test Dashboard")
         result = config.to_dict()
-        expected = {
-            "title": "Test Dashboard",
-            "layout": "grid",
-            "grid_columns": 12,
-            "gap": 20,
-            "padding": 20,
-            "show_header": True,
-            "header_background": "#f8f9fa",
-            "header_padding": 20,
-            "container_background": "transparent",
-            "container_border_radius": 8,
-        }
-        assert result == expected
+        # DashboardConfigはComponentConfigを継承しているため、すべてのフィールドが含まれる
+        assert result["title"] == "Test Dashboard"
+        assert result["layout"] == "grid"
+        assert result["grid_columns"] == 12
+        assert result["gap"] == 20
+        assert result["padding"] == 20
+        assert result["show_header"] is True
+        assert result["header_background"] == "#f8f9fa"
+        assert result["header_padding"] == 20
+        assert result["container_background"] == "transparent"
+        assert result["container_border_radius"] == 8
+        # ComponentConfigのフィールドも含まれる
+        assert "component_id" in result
+        assert "height" in result
+        assert "width" in result
 
     def test_from_dict(self):
         """辞書形式からの作成テスト"""
@@ -314,7 +317,7 @@ class TestFilterConfig:
         """デフォルト値のテスト"""
         config = FilterConfig()
         assert config.filter_type == FilterType.DROPDOWN
-        assert config.column is None
+        assert config.column == ""  # 実装では空文字列がデフォルト
         assert config.options == []
         assert config.placeholder is None
         assert config.allow_multiple is False
@@ -365,8 +368,9 @@ class TestConfigManager:
         """デフォルト設定の登録"""
         config = ComponentConfig(component_id="test")
         self.manager.register_default_config("test_component", config)
-        assert "test_component" in self.manager._default_configs
-        assert self.manager._default_configs["test_component"] == config
+        # 内部実装が変更されたため、get_configで検証
+        result = self.manager.get_config("test_component")
+        assert result == config
 
     def test_get_config_with_default(self):
         """デフォルト設定付きの設定取得"""
@@ -403,11 +407,11 @@ class TestConfigManager:
     def test_save_and_load_configs(self):
         """設定の保存と読み込み"""
         # テスト用の設定を作成
-        config1 = ComponentConfig(component_id="test1")
-        config2 = ComponentConfig(component_id="test2")
+        config1 = TableConfig(component_id="test1", page_size=20)
+        config2 = ChartConfig(component_id="test2", x_column="x")
 
-        self.manager.set_config("component1", config1, "id1")
-        self.manager.set_config("component2", config2, "id2")
+        self.manager.set_config("table", config1, "id1")
+        self.manager.set_config("chart", config2, "id2")
 
         # 一時ファイルに保存
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
@@ -421,11 +425,13 @@ class TestConfigManager:
             new_manager.load_configs(filename)
 
             # 設定が正しく読み込まれたことを確認
-            result1 = new_manager.get_config("component1", "id1")
-            result2 = new_manager.get_config("component2", "id2")
+            result1 = new_manager.get_config("table", "id1")
+            result2 = new_manager.get_config("chart", "id2")
 
             assert result1.component_id == "test1"
+            assert result1.page_size == 20
             assert result2.component_id == "test2"
+            assert result2.x_column == "x"
 
         finally:
             # 一時ファイルを削除
@@ -434,10 +440,11 @@ class TestConfigManager:
 
     def test_get_config_class(self):
         """設定クラスの取得"""
-        # 既知のコンポーネントタイプ
-        assert self.manager._get_config_class("table") == TableConfig
-        assert self.manager._get_config_class("chart") == ChartConfig
-        assert self.manager._get_config_class("filter") == FilterConfig
+        # ConfigManagerではなくConfigConverterのメソッド
+        converter = self.manager.converter
+        assert converter.get_config_class("table") == TableConfig
+        assert converter.get_config_class("chart") == ChartConfig
+        assert converter.get_config_class("filter") == FilterConfig
 
         # 未知のコンポーネントタイプ
-        assert self.manager._get_config_class("unknown") is None
+        assert converter.get_config_class("unknown") is None

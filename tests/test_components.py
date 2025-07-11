@@ -52,13 +52,15 @@ class TestChartComponent:
 
     def test_unsupported_chart_type(self):
         """サポートされていないグラフタイプのテスト"""
-        with pytest.raises(ValueError):
-            ChartComponent(
-                data=self.sample_data,
-                chart_type="unsupported",
-                x_column="date",
-                y_column="value",
-            )
+        chart = ChartComponent(
+            data=self.sample_data,
+            chart_type="unsupported",
+            x_column="date",
+            y_column="value",
+        )
+        # Error occurs when rendering, not during initialization
+        with pytest.raises(ValueError, match="Unsupported chart type: unsupported"):
+            chart.render()
 
     def test_chart_component_style(self):
         """ChartComponentのスタイル設定テスト"""
@@ -100,7 +102,7 @@ class TestTableComponent:
             page_size=5,
         )
 
-        assert table.data.equals(self.sample_data)
+        assert table.data_manager.data.equals(self.sample_data)
         assert table.enable_csv_download is True
         assert table.sortable is True
         assert table.searchable is True
@@ -124,8 +126,8 @@ class TestTableComponent:
         """TableComponentの列設定テスト"""
         table = TableComponent(data=self.sample_data, columns=["id", "name"])
 
-        assert table.columns == ["id", "name"]
-        assert len(table._display_data.columns) == 2
+        assert table.data_manager.columns == ["id", "name"]
+        assert len(table.data_manager.get_display_data().columns) == 2
 
 
 class TestFilterComponent:
@@ -179,8 +181,8 @@ class TestDashboard:
         dashboard = Dashboard(title="テストダッシュボード")
 
         assert dashboard.title == "テストダッシュボード"
-        assert dashboard.layout == "grid"
-        assert len(dashboard.components) == 0
+        assert dashboard.layout_manager.layout_type == "grid"
+        assert len(dashboard.component_manager.components) == 0
 
     def test_dashboard_add_component(self):
         """Dashboardへのコンポーネント追加テスト"""
@@ -191,9 +193,9 @@ class TestDashboard:
 
         dashboard.add_component(chart, position=(0, 0), size=(1, 1))
 
-        assert len(dashboard.components) == 1
-        assert dashboard.components[0]["position"] == (0, 0)
-        assert dashboard.components[0]["size"] == (1, 1)
+        assert len(dashboard.component_manager.components) == 1
+        assert dashboard.component_manager.components[0]["position"] == (0, 0)
+        assert dashboard.component_manager.components[0]["size"] == (1, 1)
 
     def test_dashboard_render(self):
         """Dashboardのレンダリングテスト"""
